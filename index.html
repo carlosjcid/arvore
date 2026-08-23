@@ -7,6 +7,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400..700;1,9..144,400&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
   :root{
     --bg:#f6f1e8; --bg2:#efe7d8;
@@ -151,6 +152,9 @@
   .admin-only{display:none}
   body.is-admin .admin-only{display:flex}
   body.is-admin .admin-only.block{display:block}
+  .loading{display:inline-flex;gap:4px;align-items:center}
+  .loading::after{content:"";display:inline-block;width:8px;height:8px;border-radius:50%;background:currentColor;animation:pulse .6s infinite}
+  @keyframes pulse{0%,100%{opacity:.4}50%{opacity:1}}
 
   /* review queue */
   .q-item{border:1px solid var(--line);border-radius:14px;padding:13px 14px;margin:10px 0;background:var(--surface-2)}
@@ -175,9 +179,6 @@
 
   .footer{text-align:center;color:var(--faint);font-size:.8rem;margin-top:34px;line-height:1.7}
   .footer a{color:var(--green-d);text-decoration:none;font-weight:600}
-  .storage-note{max-width:640px;margin:16px auto 0;background:var(--gold-l);border:1px solid #e6d3af;color:#6f4c1c;
-    border-radius:12px;padding:10px 14px;font-size:.8rem;display:none}
-  .storage-note.show{display:block}
 
   @media (min-width:720px){
     .overlay{align-items:center}
@@ -232,7 +233,9 @@
       <button class="btn sm" id="btnCollapse" type="button">Recolher tudo</button>
       <button class="btn sm ghost" id="btnHelp" type="button">Como funciona?</button>
     </div>
-    <div class="storage-note" id="storageNote"></div>
+    <div id="loading" style="text-align:center;color:var(--muted);padding:14px">
+      <span class="loading">Carregando árvore</span>
+    </div>
   </section>
 
   <section class="section">
@@ -272,20 +275,22 @@
 <script>
 "use strict";
 /* ==========================================================================
-   CONFIGURAÇÃO
-   Troque o PIN abaixo pelo seu. É uma trava leve (fricção), não segurança forte:
-   qualquer pessoa com conhecimento técnico consegue contornar código no navegador.
-   Para controle real, use a camada de backend (ver seção "Persistência" abaixo).
+   CONFIGURAÇÃO SUPABASE
    ========================================================================== */
-const ADMIN_PIN = "carvalho2026";
+const SUPABASE_URL = "https://rleexhjpxixhwqrbflmp.supabase.co/rest/v1/"; // ← MODIFIQUE
+const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJsZWV4aGpweGl4aHdxcmJmbG1wIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODc1MDAwOTksImV4cCI6MjEwMzA3NjA5OX0.O8rFa2XZJrNE29F6trjA_Sork2lmMMudzqa987lTxf4"; // ← MODIFIQUE
+const ADMIN_PIN = "carvalho2026"; // PIN local para autenticação no site
 
-/* Chaves de armazenamento (compartilhado entre todos que abrem a página) */
-const KEY_DATA = "carvalho_tree_v1";
-const KEY_PENDING = "carvalho_pending_v1";
+// Se não configurou, avisa:
+if(SUPABASE_URL.includes("SEU_PROJECT_ID")){
+  document.body.innerHTML = '<div style="max-width:600px;margin:60px auto;font-family:sans-serif;padding:20px;background:#fff3e0;border:1px solid #ffb74d;border-radius:8px;"><h2>Supabase não configurado</h2><p>Abra o arquivo HTML em um editor, procure por <code>SUPABASE_URL</code> e <code>SUPABASE_ANON_KEY</code> e coloque as credenciais do seu projeto Supabase.</p><p>Guia: <a href="https://supabase.com/docs/guides/getting-started/quickstarts" target="_blank">https://supabase.com/docs/guides/getting-started/quickstarts</a></p></div>';
+  throw new Error("Supabase não configurado");
+}
+
+const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 /* ==========================================================================
-   DADOS SEMENTE — transcritos do documento original.
-   P(nome, filhos, subtitulo) constrói um nó.
+   DADOS SEMENTE — transcritos do documento original
    ========================================================================== */
 function P(name, children, meta){ return { name:name, meta:meta||null, children:children||[], notes:[] }; }
 
@@ -412,19 +417,42 @@ function assignIds(){
 function depthOf(id){ return (id.match(/\./g)||[]).length; }
 
 /* ==========================================================================
-   ARMAZENAMENTO — usa window.storage (compartilhado). Fallback em memória
-   se a API não existir (ex.: arquivo aberto fora do ambiente que a injeta).
+   SUPABASE I/O
    ========================================================================== */
-const hasWS = (typeof window !== "undefined") && window.storage && typeof window.storage.get === "function";
-const mem = {};
-async function sget(key){
-  if(hasWS){ try{ const r = await window.storage.get(key, true); return r ? JSON.parse(r.value) : null; }catch(e){ return null; } }
-  return (key in mem) ? JSON.parse(mem[key]) : null;
+async function loadTreeFromDB(){
+  try{
+    const {data, error} = await supabase.from("tree_data").select("tree_json").eq("id", 1).single();
+    if(error) throw error;
+    return data?.tree_json || { tree: null, asc: null };
+  }catch(e){ console.error("Erro ao carregar árvore:", e); return { tree: null, asc: null }; }
 }
-async function sset(key, val){
-  const s = JSON.stringify(val);
-  if(hasWS){ try{ await window.storage.set(key, s, true); return true; }catch(e){ return false; } }
-  mem[key] = s; return true;
+async function saveTreeToDB(tree){
+  try{
+    const {error} = await supabase.from("tree_data").update({ tree_json: tree, updated_at: new Date() }).eq("id", 1);
+    if(error) throw error;
+    return true;
+  }catch(e){ console.error("Erro ao salvar árvore:", e); return false; }
+}
+async function loadPendingFromDB(){
+  try{
+    const {data, error} = await supabase.from("pending_suggestions").select("*").eq("status", "pending").order("created_at", {ascending: false});
+    if(error) throw error;
+    return data || [];
+  }catch(e){ console.error("Erro ao carregar sugestões:", e); return []; }
+}
+async function insertSuggestion(item){
+  try{
+    const {error} = await supabase.from("pending_suggestions").insert([item]);
+    if(error) throw error;
+    return true;
+  }catch(e){ console.error("Erro ao inserir sugestão:", e); return false; }
+}
+async function updateSuggestion(id, status){
+  try{
+    const {error} = await supabase.from("pending_suggestions").update({status}).eq("id", id);
+    if(error) throw error;
+    return true;
+  }catch(e){ console.error("Erro ao atualizar sugestão:", e); return false; }
 }
 
 /* ==========================================================================
@@ -433,9 +461,7 @@ async function sset(key, val){
 function esc(s){ return String(s==null?"":s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c])); }
 function norm(s){ return String(s||"").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,""); }
 function clone(o){ return JSON.parse(JSON.stringify(o)); }
-function uid(){ return Date.now().toString(36)+Math.random().toString(36).slice(2,7); }
 function fmtDate(ts){ try{ return new Date(ts).toLocaleDateString("pt-BR",{day:"2-digit",month:"short",year:"numeric",hour:"2-digit",minute:"2-digit"}); }catch(e){ return ""; } }
-
 function firstLetter(s){ const m = String(s).match(/[A-Za-zÀ-ÿ]/); return m ? m[0] : "?"; }
 function initials(name){
   const clean = String(name).replace(/\(.*?\)/g,"").trim();
@@ -447,12 +473,8 @@ function initials(name){
 }
 const AV_COLORS = ["#3f6b4e","#7a5b3a","#4a6b7a","#8a5a4a","#5d5a7a","#6b7a4a","#7a4a63","#4a7a6b"];
 function avatarColor(name){ let h=0; for(let i=0;i<name.length;i++) h=(h*31+name.charCodeAt(i))>>>0; return AV_COLORS[h%AV_COLORS.length]; }
-
 function countPeople(n){ let c = (n.meta==="união")?0:1; (n.children||[]).forEach(k=>c+=countPeople(k)); return c; }
 
-/* ==========================================================================
-   BUSCA — calcula nós que casam e seus ancestrais (para mostrar o caminho)
-   ========================================================================== */
 function computeMatches(){
   state.matches = new Set();
   const q = norm(state.query.trim());
@@ -463,13 +485,11 @@ function computeMatches(){
     const inNote = (n.notes||[]).some(nt=>norm(nt.text).includes(q));
     if(inName||inNote) hit.add(n.id);
   });
-  // adiciona ancestrais para revelar o caminho
   hit.forEach(id=>{
     state.matches.add(id);
     let p = parentId[id];
     while(p){ state.matches.add(p); p = parentId[p]; }
   });
-  // durante busca, abre os ancestrais
   state.matches.forEach(id=>{ if((nodeById[id].children||[]).length) state.expanded.add(id); });
 }
 function highlight(name){
@@ -534,21 +554,19 @@ function render(){
   computeMatches();
   const searching = !!state.query.trim();
 
-  // árvore principal
   const mainInner = nodeHTML(state.data.tree, true);
   document.getElementById("mainTree").innerHTML =
     '<ul class="branch root">'+ (mainInner || '<li class="empty" style="padding:14px">Nenhum resultado na descendência.</li>') +'</ul>';
 
-  // ascendência
   const ascInner = state.data.asc.map(n=>nodeHTML(n,true)).join("");
   document.getElementById("ascTree").innerHTML =
     '<ul class="branch root">'+ (ascInner || '<li class="empty" style="padding:14px">Nenhum resultado na ascendência.</li>') +'</ul>';
 
-  // stats
-  const people = countPeople(state.data.tree) - 1; // exclui os genearcas do total de descendentes
+  const people = countPeople(state.data.tree) - 1;
   document.getElementById("stats").innerHTML =
       stat(people, "descendentes") + stat(8, "ramos") + stat(6, "gerações") + (state.isAdmin?stat(state.pending.length,"em análise"):"");
   document.getElementById("descSub").textContent = "clique para expandir";
+  document.getElementById("loading").style.display = "none";
 
   updatePendingUI();
 }
@@ -561,7 +579,7 @@ function updatePendingUI(){
 }
 
 /* ==========================================================================
-   OVERLAY (sheet / modais)
+   OVERLAY
    ========================================================================== */
 const overlay = document.getElementById("overlay");
 const sheetIn = document.getElementById("sheetIn");
@@ -575,7 +593,6 @@ function closeSheet(){ overlay.classList.remove("show"); }
 overlay.addEventListener("click", e=>{ if(e.target===overlay) closeSheet(); });
 document.addEventListener("keydown", e=>{ if(e.key==="Escape") closeSheet(); });
 
-/* ----- ficha da pessoa ----- */
 function pathOf(id){
   const parts=[]; let cur=id;
   while(cur){ if(nodeById[cur] && cur!==id) parts.unshift(nodeById[cur].name); cur=parentId[cur]; }
@@ -614,7 +631,6 @@ function personSheet(id){
   );
 }
 
-/* ----- formulário: sugerir nome ----- */
 function suggestNameForm(id){
   const n = nodeById[id];
   openSheet(''
@@ -622,11 +638,10 @@ function suggestNameForm(id){
     + '<div class="path">'+esc(n.name)+'</div>'
     + '<div class="field"><label>Nome correto</label><input id="sgName" value="'+esc(n.name)+'"></div>'
     + '<div class="field"><label>Seu nome (opcional)</label><input id="sgAuthor" placeholder="Quem está sugerindo?"></div>'
-    + '<div class="hint"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 8h.01M11 12h1v4h1"/></svg><span>Sua sugestão fica visível para o administrador (e demais visitantes) até ser revisada. Nada muda na árvore antes da aprovação.</span></div>'
+    + '<div class="hint"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 8h.01M11 12h1v4h1"/></svg><span>Sua sugestão fica visível para o administrador até ser revisada.</span></div>'
     + '<div class="actions"><button class="btn" data-act="close">Cancelar</button><button class="btn primary" data-act="submit-name" data-id="'+id+'">Enviar sugestão</button></div>'
   );
 }
-/* ----- formulário: observação ----- */
 function suggestNoteForm(id){
   const n = nodeById[id];
   openSheet(''
@@ -634,52 +649,65 @@ function suggestNoteForm(id){
     + '<div class="path">Sobre: '+esc(n.name)+'</div>'
     + '<div class="field"><label>Observação</label><textarea id="sgText" rows="3" placeholder="Datas, correções, histórias, links de fotos…"></textarea></div>'
     + '<div class="field"><label>Seu nome (opcional)</label><input id="sgAuthor" placeholder="Quem está observando?"></div>'
-    + '<div class="hint"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 8h.01M11 12h1v4h1"/></svg><span>Enviada para aprovação. Fica visível para o administrador até ser revisada.</span></div>'
+    + '<div class="hint"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 8h.01M11 12h1v4h1"/></svg><span>Enviada para aprovação do administrador.</span></div>'
     + '<div class="actions"><button class="btn" data-act="close">Cancelar</button><button class="btn primary" data-act="submit-note" data-id="'+id+'">Enviar</button></div>'
   );
 }
 
 /* ==========================================================================
-   SUBMISSÃO DE SUGESTÕES
+   SUBMISSÃO
    ========================================================================== */
-async function submitSuggestion(item){
-  const cur = (await sget(KEY_PENDING)) || [];  // relê para não sobrescrever concorrentes
-  cur.push(item);
-  await sset(KEY_PENDING, cur);
-  state.pending = cur;
-  updatePendingUI(); render();
-}
 async function submitName(id){
   const val = (document.getElementById("sgName").value||"").trim();
   const author = (document.getElementById("sgAuthor").value||"").trim();
   const n = nodeById[id];
   if(!val){ toast("Escreva o nome.","err"); return; }
   if(val===n.name){ toast("O nome é igual ao atual.","err"); return; }
-  await submitSuggestion({ id:uid(), type:"rename", nodeId:id, nodeName:n.name, proposed:val, author:author, at:Date.now(), status:"pending" });
+  const success = await insertSuggestion({
+    type: "rename",
+    node_id: id,
+    node_name: n.name,
+    proposed: val,
+    text: null,
+    author: author || null,
+    status: "pending"
+  });
+  if(!success){ toast("Erro ao enviar. Tente novamente.","err"); return; }
+  state.pending = await loadPendingFromDB();
   closeSheet(); toast("Sugestão enviada para aprovação.","ok");
 }
 async function submitNote(id){
   const text = (document.getElementById("sgText").value||"").trim();
   const author = (document.getElementById("sgAuthor").value||"").trim();
   if(!text){ toast("Escreva a observação.","err"); return; }
-  await submitSuggestion({ id:uid(), type:"note", nodeId:id, nodeName:nodeById[id].name, text:text, author:author, at:Date.now(), status:"pending" });
+  const success = await insertSuggestion({
+    type: "note",
+    node_id: id,
+    node_name: nodeById[id].name,
+    proposed: null,
+    text: text,
+    author: author || null,
+    status: "pending"
+  });
+  if(!success){ toast("Erro ao enviar. Tente novamente.","err"); return; }
+  state.pending = await loadPendingFromDB();
   closeSheet(); toast("Observação enviada para aprovação.","ok");
 }
 
 /* ==========================================================================
-   ADMIN — login, fila de revisão, edições diretas
+   ADMIN
    ========================================================================== */
 function adminLogin(){
   if(state.isAdmin){
     openSheet(''
       + '<h3 id="ovTitle">Administrador</h3>'
-      + '<p class="empty">Você está no modo administrador. Pode editar nomes na hora, publicar notas oficiais e revisar sugestões.</p>'
+      + '<p class="empty">Você está no modo administrador. Pode editar nomes, publicar notas e revisar sugestões.</p>'
       + '<div class="divider"></div>'
       + '<div class="actions">'
       +   '<button class="btn ok" data-act="open-queue">Revisar sugestões ('+state.pending.length+')</button>'
       +   '<button class="btn danger" data-act="reseed">Restaurar árvore original</button>'
       + '</div>'
-      + '<div class="actions"><button class="btn ghost" data-act="admin-logout">Sair do modo admin</button></div>'
+      + '<div class="actions"><button class="btn ghost" data-act="admin-logout">Sair</button></div>'
     );
     return;
   }
@@ -700,19 +728,19 @@ function doLogin(){
 function adminLogout(){ state.isAdmin=false; document.body.classList.remove("is-admin"); closeSheet(); toast("Você saiu do modo admin."); render(); }
 
 async function openQueue(){
-  state.pending = (await sget(KEY_PENDING)) || [];
-  const items = state.pending.slice().sort((a,b)=>b.at-a.at);
+  state.pending = await loadPendingFromDB();
+  const items = state.pending.slice();
   const list = items.length ? items.map(queueItemHTML).join("") : '<p class="empty">Nenhuma sugestão pendente. Tudo em dia.</p>';
   openSheet('<h3 id="ovTitle">Sugestões pendentes ('+items.length+')</h3>'+list);
 }
 function queueItemHTML(it){
-  const who = (it.author?esc(it.author):"anónimo")+' · '+fmtDate(it.at);
+  const who = (it.author?esc(it.author):"anónimo")+' · '+fmtDate(it.created_at);
   if(it.type==="rename"){
-    const exists = !!nodeById[it.nodeId];
+    const exists = !!nodeById[it.node_id];
     return '<div class="q-item">'
       + '<div class="q-top"><span class="tag rename">Correção de nome</span><span class="who">'+who+'</span></div>'
-      + '<div class="target">Em: '+esc(it.nodeName)+'</div>'
-      + '<div class="q-change"><span class="from">'+esc(it.nodeName)+'</span> &nbsp;→&nbsp; <span class="to">'+esc(it.proposed)+'</span></div>'
+      + '<div class="target">Em: '+esc(it.node_name)+'</div>'
+      + '<div class="q-change"><span class="from">'+esc(it.node_name)+'</span> &nbsp;→&nbsp; <span class="to">'+esc(it.proposed)+'</span></div>'
       + (exists?'':'<p class="empty">Esta pessoa não existe mais na árvore.</p>')
       + '<div class="q-actions">'
       +   (exists?'<button class="btn ok sm" data-act="approve" data-id="'+it.id+'">Aprovar</button>':'')
@@ -721,63 +749,65 @@ function queueItemHTML(it){
   }
   return '<div class="q-item">'
     + '<div class="q-top"><span class="tag note">Observação</span><span class="who">'+who+'</span></div>'
-    + '<div class="target">Sobre: '+esc(it.nodeName)+'</div>'
+    + '<div class="target">Sobre: '+esc(it.node_name)+'</div>'
     + '<div class="q-change">'+esc(it.text)+'</div>'
     + '<div class="q-actions">'
-    +   (nodeById[it.nodeId]?'<button class="btn ok sm" data-act="approve" data-id="'+it.id+'">Aprovar</button>':'')
+    +   (nodeById[it.node_id]?'<button class="btn ok sm" data-act="approve" data-id="'+it.id+'">Aprovar</button>':'')
     +   '<button class="btn danger sm" data-act="reject" data-id="'+it.id+'">Rejeitar</button>'
     + '</div></div>';
 }
-async function resolveSuggestion(sid, approve){
-  // relê estado atual
-  const data = (await sget(KEY_DATA)) || state.data;
-  state.data = data; rebuildMaps();
-  let pending = (await sget(KEY_PENDING)) || [];
-  const it = pending.find(x=>x.id===sid);
+async function approveSuggestion(id){
+  const pending = await loadPendingFromDB();
+  const it = pending.find(x=>x.id===id);
   if(!it){ toast("Sugestão não encontrada.","err"); openQueue(); return; }
+  const node = nodeById[it.node_id];
+  if(!node){ toast("Alvo não existe mais; rejeite a sugestão.","err"); return; }
 
-  if(approve){
-    const node = nodeById[it.nodeId];
-    if(!node){ toast("Alvo não existe mais; rejeite a sugestão.","err"); return; }
-    if(it.type==="rename"){ node.name = it.proposed; }
-    else { (node.notes = node.notes||[]).push({ text:it.text, author:it.author||"", at:Date.now() }); }
-    await sset(KEY_DATA, state.data);
-  }
-  pending = pending.filter(x=>x.id!==sid);
-  await sset(KEY_PENDING, pending);
-  state.pending = pending;
-  toast(approve?"Aprovado e aplicado.":"Sugestão rejeitada.", approve?"ok":"");
+  if(it.type==="rename"){ node.name = it.proposed; }
+  else { (node.notes = node.notes||[]).push({ text:it.text, author:it.author||"", at:Date.now() }); }
+  const ok = await saveTreeToDB(state.data) && await updateSuggestion(id, "approved");
+  if(!ok){ toast("Erro ao aplicar. Tente novamente.","err"); return; }
+  toast("Aprovado e aplicado.","ok");
+  render(); openQueue();
+}
+async function rejectSuggestion(id){
+  const ok = await updateSuggestion(id, "rejected");
+  if(!ok){ toast("Erro ao rejeitar.","err"); return; }
+  toast("Sugestão rejeitada.", "");
   render(); openQueue();
 }
 
 async function adminSaveName(id){
   const val=(document.getElementById("adminName").value||"").trim();
   if(!val){ toast("Nome vazio.","err"); return; }
-  const data=(await sget(KEY_DATA))||state.data; state.data=data; rebuildMaps();
   if(!nodeById[id]){ toast("Nó não encontrado.","err"); return; }
-  nodeById[id].name=val; await sset(KEY_DATA,state.data);
+  nodeById[id].name=val;
+  const ok = await saveTreeToDB(state.data);
+  if(!ok){ toast("Erro ao salvar.","err"); return; }
   toast("Nome atualizado.","ok"); render(); personSheet(id);
 }
 async function adminAddNote(id){
   const val=(document.getElementById("adminNote").value||"").trim();
   if(!val){ toast("Observação vazia.","err"); return; }
-  const data=(await sget(KEY_DATA))||state.data; state.data=data; rebuildMaps();
   if(!nodeById[id]){ toast("Nó não encontrado.","err"); return; }
   (nodeById[id].notes=nodeById[id].notes||[]).push({text:val,author:"Administração",at:Date.now()});
-  await sset(KEY_DATA,state.data);
+  const ok = await saveTreeToDB(state.data);
+  if(!ok){ toast("Erro ao salvar.","err"); return; }
   toast("Nota publicada.","ok"); render(); personSheet(id);
 }
+
 async function reseed(){
   openSheet(''
     + '<h3 id="ovTitle">Restaurar árvore original?</h3>'
-    + '<p class="empty">Isto substitui todos os nomes e observações pela versão original transcrita do documento. As sugestões pendentes são mantidas. Não dá para desfazer.</p>'
+    + '<p class="empty">Isto substitui todos os nomes e observações pela versão original. As sugestões pendentes são mantidas. Não dá para desfazer.</p>'
     + '<div class="actions"><button class="btn" data-act="close">Cancelar</button><button class="btn danger" data-act="do-reseed">Restaurar</button></div>'
   );
 }
 async function doReseed(){
   state.data = { tree: clone(SEED_TREE), asc: clone(SEED_ASC) };
   assignIds(); rebuildMaps();
-  await sset(KEY_DATA, state.data);
+  const ok = await saveTreeToDB(state.data);
+  if(!ok){ toast("Erro ao restaurar.","err"); return; }
   setDefaultExpanded();
   closeSheet(); toast("Árvore restaurada.","ok"); render();
 }
@@ -789,8 +819,8 @@ function helpSheet(){
   openSheet(''
     + '<h3 id="ovTitle">Como funciona</h3>'
     + '<div class="note-item"><p><strong>1. Explore.</strong> Toque nas setas para abrir cada ramo e nos nomes para ver detalhes.</p></div>'
-    + '<div class="note-item"><p><strong>2. Contribua.</strong> Encontrou um nome errado ou tem uma história? Use “Sugerir novo nome” ou “Adicionar observação”. Sua contribuição vai para uma fila.</p></div>'
-    + '<div class="note-item"><p><strong>3. Aprovação.</strong> O administrador da família revisa cada sugestão e decide o que entra na árvore. Só depois disso a mudança aparece para todos.</p></div>'
+    + '<div class="note-item"><p><strong>2. Contribua.</strong> Encontrou um nome errado? Use "Sugerir novo nome" ou "Adicionar observação".</p></div>'
+    + '<div class="note-item"><p><strong>3. Aprovação.</strong> O administrador revisa cada sugestão. Só depois disso entra na árvore.</p></div>'
     + '<div class="actions"><button class="btn primary" data-act="close">Entendi</button></div>'
   );
 }
@@ -800,9 +830,8 @@ function helpSheet(){
    ========================================================================== */
 function setDefaultExpanded(){
   state.expanded = new Set();
-  // tronco e os 8 ramos abertos; resto recolhido
   Object.keys(nodeById).forEach(id=>{ if(id[0]==="t" && depthOf(id)<=1) state.expanded.add(id); });
-  state.data.asc.forEach(n=>state.expanded.add(n.id)); // ascendência aberta (é pequena)
+  state.data.asc.forEach(n=>state.expanded.add(n.id));
 }
 function expandAll(){ Object.keys(nodeById).forEach(id=>{ if((nodeById[id].children||[]).length) state.expanded.add(id); }); render(); }
 function collapseAll(){ state.expanded = new Set(); render(); }
@@ -820,7 +849,7 @@ function toast(msg, kind){
 }
 
 /* ==========================================================================
-   EVENTOS (delegação)
+   EVENTOS
    ========================================================================== */
 document.addEventListener("click", e=>{
   const t = e.target.closest("[data-act]");
@@ -837,8 +866,8 @@ document.addEventListener("click", e=>{
     case "close": closeSheet(); break;
     case "do-login": doLogin(); break;
     case "open-queue": openQueue(); break;
-    case "approve": resolveSuggestion(id,true); break;
-    case "reject": resolveSuggestion(id,false); break;
+    case "approve": approveSuggestion(id); break;
+    case "reject": rejectSuggestion(id); break;
     case "admin-save-name": adminSaveName(id); break;
     case "admin-add-note": adminAddNote(id); break;
     case "admin-logout": adminLogout(); break;
@@ -862,24 +891,24 @@ document.getElementById("search").addEventListener("input", e=>{
    INICIALIZAÇÃO
    ========================================================================== */
 async function init(){
-  let data = await sget(KEY_DATA);
-  if(!data || !data.tree){
+  try{
+    let dbData = await loadTreeFromDB();
+    if(!dbData.tree){
+      state.data = { tree: clone(SEED_TREE), asc: clone(SEED_ASC) };
+      assignIds();
+      await saveTreeToDB(state.data);
+    } else {
+      state.data = dbData;
+    }
+  }catch(e){
+    console.error("Erro na inicialização:", e);
     state.data = { tree: clone(SEED_TREE), asc: clone(SEED_ASC) };
     assignIds();
-    await sset(KEY_DATA, state.data);
-  } else {
-    state.data = data;
   }
   rebuildMaps();
-  state.pending = (await sget(KEY_PENDING)) || [];
+  state.pending = await loadPendingFromDB();
   setDefaultExpanded();
   render();
-
-  if(!hasWS){
-    const el = document.getElementById("storageNote");
-    el.innerHTML = "⚠️ Modo local: este ambiente não tem armazenamento compartilhado, então as sugestões não são salvas entre dispositivos. Para uso real entre a família, hospede com um backend (ver instruções na entrega).";
-    el.classList.add("show");
-  }
 }
 init();
 </script>
