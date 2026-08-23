@@ -3,348 +3,352 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<title>Admin — Árvore Carvalho & Batista</title>
+<title>Admin — Carvalho & Batista</title>
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
 :root{--bg:#fcfaf6;--card:#fff;--text:#1a1310;--text2:#5d524d;--text3:#8b8077;--border:#e8e1d8;--warm:#c97f4e;--cool:#4a7169;--light:#f5eee5;--ok:#3f8659;--danger:#c84d3d;--r:12px}
 *{box-sizing:border-box}html,body{margin:0;padding:0}
 body{font-family:'Plus Jakarta Sans',sans-serif;color:var(--text);background:var(--bg);line-height:1.6;-webkit-font-smoothing:antialiased}
-.topbar{background:var(--card);border-bottom:1px solid var(--border);padding:16px;position:sticky;top:0;z-index:40;display:flex;align-items:center;gap:12px}
-.topbar-icon{width:36px;height:36px;border-radius:10px;background:linear-gradient(135deg,var(--cool),var(--warm));display:grid;place-items:center;color:#fff;font-size:18px;flex-shrink:0}
-.topbar h1{font-size:16px;font-weight:700;margin:0;flex:1}
-.topbar a{color:var(--cool);text-decoration:none;font-size:13px;font-weight:600}
-.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;min-height:44px;padding:0 16px;border:1px solid var(--border);border-radius:var(--r);background:var(--card);color:var(--text);font:inherit;font-size:14px;font-weight:600;cursor:pointer;transition:all .2s}
+
+/* === HEADER === */
+.header{background:var(--card);border-bottom:1px solid var(--border);padding:12px 16px;position:sticky;top:0;z-index:40;display:flex;align-items:center;gap:12px}
+.header-icon{width:36px;height:36px;border-radius:10px;background:linear-gradient(135deg,var(--cool),var(--warm));display:grid;place-items:center;color:#fff;font-size:18px;flex-shrink:0}
+.header h1{font-size:15px;font-weight:700;margin:0;flex:1}
+.header small{display:block;font-size:11px;color:var(--text3);font-weight:500}
+.header a{color:var(--cool);text-decoration:none;font-size:13px;font-weight:600}
+
+/* === LAYOUT === */
+.layout{display:flex;flex-direction:column;min-height:calc(100vh - 60px)}
+.tree-pane{flex:1;padding:16px;overflow-y:auto}
+.panel-pane{background:var(--card);border-top:1px solid var(--border);max-height:40vh;overflow-y:auto}
+@media(min-width:900px){
+  .layout{flex-direction:row}
+  .tree-pane{flex:1;padding:24px;overflow-y:auto;max-height:calc(100vh - 60px)}
+  .panel-pane{width:380px;flex-shrink:0;border-top:none;border-left:1px solid var(--border);max-height:calc(100vh - 60px);overflow-y:auto}
+}
+
+/* === BUTTONS === */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;min-height:44px;padding:0 16px;border:1px solid var(--border);border-radius:var(--r);background:var(--card);color:var(--text);font:inherit;font-size:14px;font-weight:600;cursor:pointer;transition:all .15s}
 .btn:active{transform:translateY(1px)}
 .btn.primary{background:var(--cool);color:#fff;border-color:var(--cool)}
+.btn.secondary{background:var(--light);color:var(--warm);border-color:transparent}
 .btn.ok{background:var(--ok);color:#fff;border-color:var(--ok)}
 .btn.danger{background:#fce4e0;color:var(--danger);border-color:transparent}
-.btn.sm{min-height:36px;padding:0 12px;font-size:13px;border-radius:8px}
-.wrap{max-width:800px;margin:0 auto;padding:24px 16px 60px}
-/* Login */
-.login{max-width:360px;margin:80px auto;background:var(--card);border:1px solid var(--border);border-radius:16px;padding:32px;text-align:center}
-.login-icon{width:56px;height:56px;border-radius:16px;background:linear-gradient(135deg,var(--cool),var(--warm));display:grid;place-items:center;color:#fff;font-size:28px;margin:0 auto 16px}
-.login h2{margin:0 0 8px;font-size:20px}
-.login p{color:var(--text2);font-size:13px;margin:0 0 20px}
-.login input{width:100%;padding:12px 14px;border:1px solid var(--border);border-radius:var(--r);font:inherit;font-size:15px;margin-bottom:12px;text-align:center;letter-spacing:2px}
-.login .btn{width:100%}
-/* Tabs */
-.tabs{display:flex;gap:4px;background:var(--light);padding:4px;border-radius:var(--r);margin-bottom:24px;overflow-x:auto}
-.tab{flex:1;min-width:max-content;padding:10px 14px;border:none;background:none;border-radius:8px;font:inherit;font-size:13px;font-weight:600;color:var(--text2);cursor:pointer;white-space:nowrap;transition:all .2s}
+.btn.sm{min-height:34px;padding:0 12px;font-size:12px;border-radius:8px}
+
+/* === STATS === */
+.stat-row{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:16px;padding:16px 16px 0}
+.stat{background:var(--bg);border:1px solid var(--border);border-radius:var(--r);padding:12px;text-align:center}
+.stat b{display:block;font-size:22px;font-weight:800;color:var(--cool);line-height:1}
+.stat span{font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.4px;font-weight:600}
+
+/* === TABS === */
+.tabs{display:flex;gap:2px;background:var(--light);padding:3px;border-radius:10px;margin:0 16px 12px}
+.tab{flex:1;padding:8px;border:none;background:none;border-radius:8px;font:inherit;font-size:12px;font-weight:600;color:var(--text2);cursor:pointer;text-align:center;transition:all .15s}
 .tab.active{background:var(--card);color:var(--text);box-shadow:0 1px 3px rgba(0,0,0,.08)}
-.tab .count{display:inline-block;min-width:18px;height:18px;line-height:18px;padding:0 5px;border-radius:9px;background:var(--warm);color:#fff;font-size:11px;margin-left:4px}
-.panel{display:none}
-.panel.active{display:block}
-/* Cards */
-.stat-row{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:24px}
-.stat{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:16px;text-align:center}
-.stat b{display:block;font-size:28px;font-weight:800;color:var(--cool);line-height:1}
-.stat span{font-size:11px;color:var(--text3);text-transform:uppercase;letter-spacing:.4px;font-weight:600}
-.item{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:16px;margin-bottom:12px}
-.item-top{display:flex;align-items:center;gap:8px;margin-bottom:10px;flex-wrap:wrap}
-.tag{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;padding:3px 8px;border-radius:6px}
+.tab .cnt{display:inline-block;min-width:16px;height:16px;line-height:16px;padding:0 4px;border-radius:8px;background:var(--warm);color:#fff;font-size:10px;margin-left:3px}
+.panel-body{padding:0 16px 16px}
+
+/* === QUEUE ITEMS === */
+.q-item{background:var(--bg);border:1px solid var(--border);border-radius:var(--r);padding:12px;margin-bottom:10px}
+.q-top{display:flex;align-items:center;gap:6px;margin-bottom:6px;flex-wrap:wrap}
+.tag{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;padding:2px 7px;border-radius:5px}
 .tag.rename{background:var(--light);color:var(--warm)}
 .tag.note{background:#e6efe9;color:var(--ok)}
 .tag.approved{background:#e6efe9;color:var(--ok)}
 .tag.rejected{background:#fce4e0;color:var(--danger)}
-.item .who{color:var(--text3);font-size:12px;margin-left:auto}
-.item-change{background:var(--bg);border:1px dashed var(--border);border-radius:8px;padding:10px 12px;margin:8px 0;font-size:14px}
-.item-change .from{color:var(--danger);text-decoration:line-through;opacity:.7}
-.item-change .to{color:var(--ok);font-weight:700}
-.item-actions{display:flex;gap:8px;margin-top:10px}
-.empty{text-align:center;color:var(--text3);padding:40px 20px;font-size:14px}
-/* Tree edit */
-.tree{list-style:none;margin:0;padding:0}
-.tree-branch{list-style:none;margin:0;padding-left:18px;border-left:2px solid var(--border)}
+.q-who{color:var(--text3);font-size:11px;margin-left:auto}
+.q-change{background:var(--card);border:1px dashed var(--border);border-radius:8px;padding:8px 10px;margin:6px 0;font-size:13px}
+.q-from{color:var(--danger);text-decoration:line-through;opacity:.7}
+.q-to{color:var(--ok);font-weight:700}
+.q-actions{display:flex;gap:6px;margin-top:8px}
+.empty{text-align:center;color:var(--text3);padding:30px 16px;font-size:13px}
+
+/* === TREE (replica do index.html) === */
+.section{background:var(--card);border:1px solid var(--border);border-radius:16px;margin-bottom:16px;overflow:hidden}
+.section-head{padding:12px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px}
+.section-dot{width:8px;height:8px;border-radius:50%;background:var(--warm);flex-shrink:0}
+.section-title{font-weight:700;font-size:15px;margin:0;flex:1}
+.section-sub{font-size:11px;color:var(--text3);font-weight:500;text-transform:uppercase;letter-spacing:.3px}
+.section-body{padding:12px}
+.tree-branch{list-style:none;margin:0;padding:0 0 0 18px;border-left:2px solid var(--border)}
 .tree-branch.root{padding:0;border:none}
-.tree-item{margin:2px 0}
-.node{display:flex;align-items:center;gap:8px;padding:8px;border-radius:8px;transition:background .15s}
-.node:hover{background:var(--light)}
-.node-tog{width:22px;height:22px;border:none;background:none;color:var(--text3);cursor:pointer;font-size:14px;transition:transform .2s;flex-shrink:0}
-.node-tog.open{transform:rotate(90deg)}
-.node-tog.leaf{visibility:hidden}
-.node-name{flex:1;font-size:14px;font-weight:500;cursor:pointer;padding:4px;border-radius:6px;border:1px solid transparent}
-.node-name:hover{background:var(--card);border-color:var(--border)}
-.node-add{width:28px;height:28px;border:1px solid var(--border);background:var(--card);border-radius:6px;cursor:pointer;color:var(--ok);font-size:16px;flex-shrink:0}
-.node-tools{display:flex;gap:4px;flex-shrink:0;opacity:0;transition:opacity .15s}
-.node:hover .node-tools,.node:focus-within .node-tools{opacity:1}
-.node-btn{width:28px;height:28px;border:1px solid var(--border);background:var(--card);border-radius:6px;cursor:pointer;font-size:13px;display:grid;place-items:center;padding:0;color:var(--text2)}
-.node-btn:hover{background:var(--light)}
-.node-btn.del{color:var(--danger)}
-.node-btn.del:hover{background:#fce4e0}
-.node-btn.mv{color:var(--cool)}
-.node-btn:disabled{opacity:.25;cursor:not-allowed}
-.node-grip{cursor:grab;color:var(--text3);font-size:14px;padding:0 2px;flex-shrink:0;touch-action:none}
-.node-grip:active{cursor:grabbing}
-.node[draggable="true"]{cursor:grab}
-.node.dragging{opacity:.4}
-.tree-item.drop-before>.node{box-shadow:0 -2px 0 var(--cool)}
-.tree-item.drop-after>.node{box-shadow:0 2px 0 var(--cool)}
-.tree-item.drop-into>.node{background:#dcebe6;box-shadow:inset 0 0 0 2px var(--cool)}
-.edit-hint{font-size:13px;color:var(--text2);margin:0 0 16px;line-height:1.6}
-.edit-hint kbd{background:var(--light);border:1px solid var(--border);border-radius:4px;padding:1px 6px;font-family:inherit;font-size:12px;font-weight:600}
-.move-target{padding:10px 12px;border:1px solid var(--border);border-radius:8px;margin:4px 0;cursor:pointer;font-size:14px;transition:background .15s}
-.move-target:hover{background:var(--light)}
-.move-target.current{opacity:.4;pointer-events:none}
-.move-list{max-height:50vh;overflow-y:auto;margin:12px 0}
-/* Modal */
+.tree-item{position:relative;margin:3px 0}
+.tree-branch>.tree-item::before{content:"";position:absolute;top:17px;left:-18px;width:14px;height:2px;background:var(--border)}
+.node-row{display:flex;align-items:center;gap:6px;padding:5px 6px;border-radius:10px;transition:background .15s;position:relative}
+.node-row:hover{background:var(--light)}
+.node-toggle{width:22px;height:22px;border-radius:6px;display:grid;place-items:center;border:none;background:none;color:var(--text3);font-size:13px;cursor:pointer;transition:transform .2s;flex-shrink:0}
+.node-toggle.open{transform:rotate(90deg)}
+.node-toggle.leaf{visibility:hidden}
+.node-avatar{width:30px;height:30px;border-radius:8px;display:grid;place-items:center;background:linear-gradient(135deg,var(--cool),var(--warm));color:#fff;font-size:11px;font-weight:700;flex-shrink:0}
+.node-name-wrap{flex:1;min-width:0;cursor:pointer}
+.node-nm{font-weight:600;font-size:13px;display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.node-mt{color:var(--text3);font-size:11px;display:block}
+.kind-root>.node-row{background:linear-gradient(135deg,var(--cool),#5a8375);color:#fff;padding:10px;border-radius:12px}
+.kind-root .node-nm,.kind-root .node-mt{color:#fff}
+.kind-ramo>.node-row{background:var(--light)}
+.kind-ramo .node-nm{font-size:14px}
+.kind-uniao .node-avatar{background:transparent;color:var(--warm);border:2px dashed var(--border)}
+.kind-uniao .node-nm{font-style:italic;color:var(--text2)}
+
+/* === ADMIN CONTROLS ON NODES === */
+.node-tools{display:flex;gap:3px;flex-shrink:0;opacity:0;transition:opacity .15s}
+.node-row:hover .node-tools{opacity:1}
+@media(max-width:600px){.node-tools{opacity:1}}
+.nbtn{width:26px;height:26px;border:1px solid var(--border);background:var(--card);border-radius:6px;cursor:pointer;font-size:12px;display:grid;place-items:center;padding:0;color:var(--text2);flex-shrink:0}
+.nbtn:hover{background:var(--light)}
+.nbtn.del{color:var(--danger)}.nbtn.del:hover{background:#fce4e0}
+.nbtn.mv{color:var(--cool)}
+.nbtn:disabled{opacity:.2;cursor:not-allowed}
+.grip{cursor:grab;color:var(--text3);font-size:12px;padding:0 1px;flex-shrink:0;touch-action:none}
+.grip:active{cursor:grabbing}
+.node-row[draggable="true"]{cursor:grab}
+.node-row.dragging{opacity:.35}
+.tree-item.drop-before>.node-row{box-shadow:0 -2px 0 var(--cool)}
+.tree-item.drop-after>.node-row{box-shadow:0 2px 0 var(--cool)}
+.tree-item.drop-into>.node-row{background:#dcebe6;box-shadow:inset 0 0 0 2px var(--cool)}
+
+/* === MODAL === */
 .modal{position:fixed;inset:0;z-index:50;background:rgba(26,19,16,.5);backdrop-filter:blur(4px);display:none;align-items:center;justify-content:center;padding:16px}
 .modal.show{display:flex}
-.modal-box{background:var(--card);width:100%;max-width:420px;border-radius:16px;padding:24px}
-.modal-box h3{margin:0 0 16px;font-size:18px}
-.modal-box input,.modal-box textarea{width:100%;padding:12px;border:1px solid var(--border);border-radius:var(--r);font:inherit;font-size:14px;margin-bottom:12px}
-.modal-box textarea{min-height:80px;resize:vertical;font-family:inherit}
-.modal-actions{display:flex;gap:8px}
-.modal-actions .btn{flex:1}
-.toast{position:fixed;bottom:20px;left:16px;right:16px;z-index:60;background:var(--text);color:#fff;padding:14px 18px;border-radius:var(--r);font-size:14px;font-weight:600;opacity:0;transform:translateY(12px);transition:all .25s;text-align:center;max-width:400px;margin:0 auto}
-.toast.show{opacity:1;transform:translateY(0)}
-.toast.ok{background:var(--ok)}
-@media(min-width:640px){.wrap{padding:32px 24px 60px}.toast{left:50%;transform:translateX(-50%) translateY(12px)}.toast.show{transform:translateX(-50%) translateY(0)}}
+.mbox{background:var(--card);width:100%;max-width:420px;border-radius:16px;padding:24px;max-height:85vh;overflow-y:auto}
+.mbox h3{margin:0 0 12px;font-size:18px}
+.mbox input,.mbox textarea{width:100%;padding:12px;border:1px solid var(--border);border-radius:var(--r);font:inherit;font-size:14px;margin-bottom:10px}
+.mbox textarea{min-height:80px;resize:vertical;font-family:inherit}
+.mact{display:flex;gap:8px}.mact .btn{flex:1}
+.mvt{padding:10px 12px;border:1px solid var(--border);border-radius:8px;margin:4px 0;cursor:pointer;font-size:13px;transition:background .15s}
+.mvt:hover{background:var(--light)}
+.mvl{max-height:45vh;overflow-y:auto;margin:10px 0}
+
+/* === TOAST === */
+.toast{position:fixed;bottom:20px;left:16px;right:16px;z-index:60;background:var(--text);color:#fff;padding:12px 18px;border-radius:var(--r);font-size:14px;font-weight:600;opacity:0;transform:translateY(12px);pointer-events:none;transition:all .25s;text-align:center;max-width:360px;margin:0 auto}
+.toast.show{opacity:1;transform:translateY(0)}.toast.suc{background:var(--ok)}
+
+/* === LOGIN === */
+.login{max-width:340px;margin:80px auto;background:var(--card);border:1px solid var(--border);border-radius:16px;padding:32px;text-align:center}
+.login-icon{width:52px;height:52px;border-radius:14px;background:linear-gradient(135deg,var(--cool),var(--warm));display:grid;place-items:center;color:#fff;font-size:26px;margin:0 auto 14px}
+.login h2{margin:0 0 6px;font-size:18px}
+.login p{color:var(--text2);font-size:12px;margin:0 0 16px}
+.login input{width:100%;padding:12px;border:1px solid var(--border);border-radius:var(--r);font:inherit;font-size:15px;margin-bottom:12px;text-align:center;letter-spacing:2px}
+.login .btn{width:100%}
+
+.toolbar{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px}
 </style>
 </head>
 <body>
-
 <div id="app"></div>
-<div class="modal" id="modal"><div class="modal-box" id="modalBox"></div></div>
+<div class="modal" id="modal"><div class="mbox" id="mbox"></div></div>
 <div class="toast" id="toast"></div>
-
 <script>
 "use strict";
-const SUPABASE_URL = "https://rleexhjpx1xhwqrbf1mp.supabase.co";
-const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJsZWV4aGpweGl4aHdxcmJmbG1wIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODc1MDAwOTksImV4cCI6MjEwMzA3NjA5OX0.O8rFa2XZJrNE29F6trjA_Sork2lmMMudzqa987lTxf4";
-const ADMIN_PIN = "familia2026";
-const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+var SUPABASE_URL="https://rleexhjpx1xhwqrbf1mp.supabase.co";
+var SUPABASE_ANON_KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJsZWV4aGpweGl4aHdxcmJmbG1wIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODc1MDAwOTksImV4cCI6MjEwMzA3NjA5OX0.O8rFa2XZJrNE29F6trjA_Sork2lmMMudzqa987lTxf4";
+var ADMIN_PIN="familia2026";
+var sb=window.supabase.createClient(SUPABASE_URL,SUPABASE_ANON_KEY);
 
-let state = {data:null, pending:[], history:[], expanded:new Set(), tab:"pending", authed:false};
-let nById = {}, pId = {};
+function P(n,c,m){return{name:n,meta:m||null,notes:[],children:c||[]}}
+var SEED={tree:P("Aires José de Carvalho & Rosa Batista",[P("Mª Amélia Carvalho & Armindo",[P("Mª Fernanda (Nina)",[P("com Afonso",[P("Bruno")],"união"),P("com Rogério",[P("Marília & Benjamim",[P("Cláudia & Ricardo",[P("Iara (& Bruno)"),P("Ivo")]),P("Liliana & Nuno",[P("João"),P("Paula")])]),P("Manuel & Ana",[P("Rogério & Claudia",[P("Gonçalo")])]),P("Hermínia Isolette")],"união")])],"Ramo 1"),P("Francisco Carvalho & Lourdes",[P("Carmo & Francisco",[P("Ana Francisca & Tom",[P("Diana")]),P("Francisco Aires"),P("Manuel Francisco")]),P("Edna",[P("com Armando",[P("Sónia & Tony",[P("Lourdinhas"),P("Kiko")]),P("Ana Paula & António Eugénio",[P("Daniela & Nani",[P("Lucas"),P("Catarina"),P("Beatriz")]),P("Paulo André & Melanie",[P("Leonardo"),P("Adriana"),P("Sienna")]),P("Marcos")]),P("Margarida (Guida) & Zé",[P("Zé & Maria",[P("António"),P("Eva")]),P("Margarida"),P("Sofia Margarida")]),P("Vanda & Marcos",[P("Diogo"),P("Dennis")])],"união"),P("com Ricardo",[P("Rafaela",[P("Filipe")])],"união")])],"Ramo 2"),P("Lucília Carvalho & Constantino",[P("Nelson & Mariazinha",[P("Solange & Tobi",[P("Rafael"),P("Lucky"),P("Aliej")]),P("Tommy"),P("Stephanie"),P("Nicolas")]),P("Leno"),P("Carlos Osvaldo & Manuela",[P("Susana Raquel")]),P("César",[P("Heliana")])],"Ramo 3"),P("Alice Carvalho & Armindo",[P("Fernando Hitler & Mª Teresa",[P("Vera",[P("Carlos Miguel"),P("Rodrigo"),P("Lucas")]),P("Fernando"),P("Aires")]),P("Elsa & Queirós",[P("Miguel"),P("Ivo & Ana Cristina",[P("Thelma"),P("Tomas")]),P("Nuno & Luísa",[P("Tiago")]),P("Hildeberto Jorge & Tânia")]),P("Sandra",[P("com Ângelo",[P("Ricardo César"),P("João Filipe"),P("Ângela & Tomás",[P("Guilherme")])],"união"),P("com Otelo",[P("Martim")],"união")])],"Ramo 4"),P("Mª Lourdes (Lurdes) Carvalho & Zé",[P("Célia & João Lemos",[P("Marina",[P("Maria Vitória")])]),P("Fernando"),P("Carla & Carlos",[P("Beatriz",[P("Daniel")]),P("Pedro")])],"Ramo 5"),P("Emília Carvalho & Mário",[P("Carlos Jorge & Patrícia")],"Ramo 6"),P("Fernando Edgar José de Carvalho & Maria Ana",[P("Ana Sofia Gonçalves de Carvalho & Rui",[P("Inês"),P("Gonçalo")]),P("Rui Edgar & Davi")],"Ramo 7"),P("Isabel Celeste Carvalho & Joaquim",[P("Vera Mónica & Adrian",[P("Lara"),P("Liam")]),P("Ana Cristina & Gonçalo",[P("Maria Rita")])],"Ramo 8")],"Genearcas"),asc:[P("Linhagem Patrilinear — Pais de Aires",[],"Vila Nova de Famalicão"),P("Linhagem Matrilinear — Pais de Rosa",[P("Pai de Rosa",[],"Transmontano"),P("Mãe de Rosa",[],"Angolana")],"avós maternos"),P("Tios-Avós Paternos",[P("Amélia de Carvalho"),P("Irmão varão")])]};
 
-function esc(s){return String(s||"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}
-function fmtD(ts){try{return new Date(ts).toLocaleDateString("pt-BR",{day:"2-digit",month:"short",hour:"2-digit",minute:"2-digit"})}catch(e){return""}}
-function toast(m,ok){const t=document.getElementById("toast");t.textContent=m;t.className="toast show"+(ok?" ok":"");setTimeout(()=>t.classList.remove("show"),2500)}
-function modal(h){document.getElementById("modalBox").innerHTML=h;document.getElementById("modal").classList.add("show")}
+var state={data:null,pending:[],history:[],expanded:new Set(),tab:"pending",authed:false};
+var nById={},pId={};
+function esc(s){return String(s||"").replace(/[&<>"']/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]})}
+function fmtD(t){try{return new Date(t).toLocaleDateString("pt-BR",{day:"2-digit",month:"short",hour:"2-digit",minute:"2-digit"})}catch(e){return""}}
+function toast(m,ok){var t=document.getElementById("toast");t.textContent=m;t.className="toast show"+(ok?" suc":"");setTimeout(function(){t.classList.remove("show")},2500)}
+function modal(h){document.getElementById("mbox").innerHTML=h;document.getElementById("modal").classList.add("show")}
 function closeM(){document.getElementById("modal").classList.remove("show")}
-
-function assign(n,id){n.id=id;if(!n.notes)n.notes=[];(n.children||[]).forEach((c,i)=>assign(c,id+"."+i))}
-function rebuild(){nById={};pId={};const w=(n,pid)=>{nById[n.id]=n;if(pid)pId[n.id]=pid;(n.children||[]).forEach(c=>w(c,n.id))};if(state.data){w(state.data.tree,null);state.data.asc.forEach(n=>w(n,null))}}
+function assign(n,id){n.id=id;if(!n.notes)n.notes=[];(n.children||[]).forEach(function(c,i){assign(c,id+"."+i)})}
+function rebuild(){nById={};pId={};var w=function(n,pid){nById[n.id]=n;if(pid)pId[n.id]=pid;(n.children||[]).forEach(function(c){w(c,n.id)})};w(state.data.tree,null);state.data.asc.forEach(function(n){w(n,null)})}
+function reindex(){assign(state.data.tree,"t");(state.data.asc||[]).forEach(function(x,i){assign(x,"a"+i)});rebuild()}
+function siblingsOf(id){if(/^a\d+$/.test(id)){return{arr:state.data.asc,idx:+id.slice(1)}}var pid=pId[id];if(!pid)return null;var arr=nById[pid].children;var idx=arr.findIndex(function(x){return x.id===id});return{arr:arr,idx:idx}}
+function isDesc(anc,maybe){var c=maybe;while(c){if(c===anc)return true;c=pId[c]}return false}
+function countPeople(n){var c=(n.meta==="união")?0:1;(n.children||[]).forEach(function(k){c+=countPeople(k)});return c}
 
 async function loadAll(){
-  try{
-    const {data} = await sb.from("tree_data").select("tree_json").eq("id",1).single();
-    state.data = data?.tree_json || {tree:{name:"(vazio)",children:[],notes:[]},asc:[]};
-  }catch(e){ state.data={tree:{name:"(erro ao carregar)",children:[],notes:[]},asc:[]}; }
-  if(state.data.tree && !state.data.tree.id){assign(state.data.tree,"t");(state.data.asc||[]).forEach((n,i)=>assign(n,"a"+i))}
+  try{var r=await sb.from("tree_data").select("tree_json").eq("id",1).single();state.data=r.data?.tree_json||SEED}catch(e){state.data=SEED}
+  if(!state.data.tree.id){assign(state.data.tree,"t");(state.data.asc||[]).forEach(function(n,i){assign(n,"a"+i)})}
   rebuild();
-  state.pending = await sb.from("pending_suggestions").select("*").eq("status","pending").order("created_at",{ascending:false}).then(r=>r.data||[]).catch(()=>[]);
-  state.history = await sb.from("pending_suggestions").select("*").neq("status","pending").order("created_at",{ascending:false}).limit(50).then(r=>r.data||[]).catch(()=>[]);
-  renderApp();
+  state.pending=await sb.from("pending_suggestions").select("*").eq("status","pending").order("created_at",{ascending:false}).then(function(r){return r.data||[]}).catch(function(){return[]});
+  state.history=await sb.from("pending_suggestions").select("*").neq("status","pending").order("created_at",{ascending:false}).limit(50).then(function(r){return r.data||[]}).catch(function(){return[]});
+  renderAll();
 }
 async function save(){return sb.from("tree_data").update({tree_json:state.data,updated_at:new Date()}).eq("id",1)}
 
+/* === LOGIN === */
 function renderLogin(){
-  document.getElementById("app").innerHTML = '<div class="login"><div class="login-icon">🔐</div><h2>Área do administrador</h2><p>Digite a senha para revisar e gerenciar a árvore genealógica.</p><input id="pin" type="password" placeholder="senha" autofocus><button class="btn primary" onclick="tryLogin()">Entrar</button></div>';
-  setTimeout(()=>{const i=document.getElementById("pin");if(i){i.focus();i.addEventListener("keydown",e=>{if(e.key==="Enter")tryLogin()})}},100);
+  document.getElementById("app").innerHTML='<div class="login"><div class="login-icon">🔐</div><h2>Área do administrador</h2><p>Digite a senha para gerenciar a árvore genealógica.</p><input id="pin" type="password" placeholder="senha" autofocus><button class="btn primary" onclick="tryLogin()">Entrar</button></div>';
+  setTimeout(function(){var i=document.getElementById("pin");if(i){i.focus();i.onkeydown=function(e){if(e.key==="Enter")tryLogin()}}},100);
 }
-window.tryLogin = function(){
-  const p=(document.getElementById("pin").value||"").trim();
-  if(p===ADMIN_PIN){state.authed=true;toast("Bem-vindo!",true);loadAll()}
-  else toast("Senha incorreta");
+window.tryLogin=function(){var p=(document.getElementById("pin").value||"").trim();if(p===ADMIN_PIN){state.authed=true;toast("Bem-vindo!",true);loadAll()}else toast("Senha incorreta")}
+
+/* === TREE NODE HTML (replica do index + controles admin) === */
+function nodeHTML(n,parent,idx,sibs){
+  var kids=n.children||[],open=state.expanded.has(n.id),hasK=kids.length>0;
+  var isRoot=n.id==="t"||/^a\d+$/.test(n.id);
+  var kind=n.id==="t"?"kind-root":(n.meta&&/^Ramo/.test(n.meta)?"kind-ramo":(n.meta==="união"?"kind-uniao":""));
+  var up=idx>0,down=sibs&&idx<sibs.length-1;
+  var cH="";
+  if(hasK&&open){cH='<ul class="tree-branch">'+kids.map(function(c,i){return nodeHTML(c,n,i,kids)}).join("")+'</ul>'}
+  var tools='<div class="node-tools">'
+    +'<button class="nbtn" onclick="moveSib(\''+n.id+'\',-1)" title="Subir" '+(up?"":"disabled")+'>↑</button>'
+    +'<button class="nbtn" onclick="moveSib(\''+n.id+'\',1)" title="Descer" '+(down?"":"disabled")+'>↓</button>'
+    +'<button class="nbtn mv" onclick="moveToModal(\''+n.id+'\')" title="Mover">⇄</button>'
+    +'<button class="nbtn" onclick="addChild(\''+n.id+'\')" title="Adicionar" style="color:var(--ok)">+</button>'
+    +(isRoot?'':'<button class="nbtn del" onclick="delNode(\''+n.id+'\')" title="Excluir">×</button>')
+    +'</div>';
+  var grip=isRoot?'':'<span class="grip" title="Arraste">⋮⋮</span>';
+  var badge=(n.notes||[]).length?'<span style="display:inline-flex;align-items:center;gap:3px;height:20px;padding:0 7px;border-radius:99px;background:var(--light);color:var(--warm);font-size:10px;font-weight:700;flex-shrink:0">'+n.notes.length+'</span>':'';
+  return '<li class="tree-item" data-id="'+n.id+'"><div class="node-row '+kind+'" '+(isRoot?'':'draggable="true"')+' data-id="'+n.id+'">'
+    +'<button class="node-toggle'+(open?" open":"")+(hasK?"":" leaf")+'" data-act="toggle" data-id="'+n.id+'">›</button>'
+    +grip
+    +'<span class="node-avatar">'+esc((n.name||"?")[0].toUpperCase())+'</span>'
+    +'<span class="node-name-wrap" onclick="editName(\''+n.id+'\')">'
+    +'<span class="node-nm">'+esc(n.name)+'</span>'
+    +(n.meta&&n.meta!=="união"?'<span class="node-mt">'+esc(n.meta)+'</span>':'')
+    +'</span>'
+    +badge+tools
+    +'</div>'+cH+'</li>';
 }
 
-function renderApp(){
+/* === PANEL HTML === */
+function panelPending(){
+  if(!state.pending.length)return'<div class="empty">Nenhuma sugestão pendente 🎉</div>';
+  return state.pending.map(function(it){
+    var w='<span class="q-who">'+(it.author?esc(it.author):"anón.")+' · '+fmtD(it.created_at)+'</span>';
+    if(it.type==="rename")return'<div class="q-item"><div class="q-top"><span class="tag rename">Nome</span>'+w+'</div><div class="q-change"><span class="q-from">'+esc(it.node_name)+'</span> → <span class="q-to">'+esc(it.proposed)+'</span></div><div class="q-actions"><button class="btn ok sm" onclick="approve(\''+it.id+'\')">Aprovar</button><button class="btn danger sm" onclick="reject(\''+it.id+'\')">Rejeitar</button></div></div>';
+    return'<div class="q-item"><div class="q-top"><span class="tag note">Obs</span>'+w+'</div><div style="font-weight:600;font-size:13px;margin-bottom:3px">'+esc(it.node_name)+'</div><div class="q-change">'+esc(it.text)+'</div><div class="q-actions"><button class="btn ok sm" onclick="approve(\''+it.id+'\')">Aprovar</button><button class="btn danger sm" onclick="reject(\''+it.id+'\')">Rejeitar</button></div></div>';
+  }).join("");
+}
+function panelHistory(){
+  if(!state.history.length)return'<div class="empty">Nenhuma decisão ainda.</div>';
+  return state.history.map(function(it){
+    var tag=it.status==="approved"?'<span class="tag approved">✓</span>':'<span class="tag rejected">✗</span>';
+    var d=it.type==="rename"?esc(it.node_name)+' → '+esc(it.proposed):esc(it.node_name)+': '+esc((it.text||"").slice(0,50));
+    return'<div class="q-item"><div class="q-top">'+tag+'<span class="q-who">'+fmtD(it.created_at)+'</span></div><div style="font-size:12px;color:var(--text2)">'+d+'</div></div>';
+  }).join("");
+}
+
+/* === FULL RENDER === */
+function renderAll(){
   if(!state.authed){renderLogin();return}
-  const pc = state.pending.length;
-  document.getElementById("app").innerHTML =
-    '<header class="topbar"><div class="topbar-icon">🌱</div><h1>Painel Admin</h1><a href="index.html">Ver site →</a></header>'
-    + '<div class="wrap">'
-    + '<div class="stat-row"><div class="stat"><b>'+pc+'</b><span>Pendentes</span></div><div class="stat"><b>'+state.history.filter(x=>x.status==="approved").length+'</b><span>Aprovadas</span></div><div class="stat"><b>'+state.history.filter(x=>x.status==="rejected").length+'</b><span>Rejeitadas</span></div></div>'
-    + '<div class="tabs">'
-    +   '<button class="tab'+(state.tab==="pending"?" active":"")+'" onclick="setTab(\'pending\')">Pendentes'+(pc?'<span class="count">'+pc+'</span>':'')+'</button>'
-    +   '<button class="tab'+(state.tab==="edit"?" active":"")+'" onclick="setTab(\'edit\')">Editar árvore</button>'
-    +   '<button class="tab'+(state.tab==="history"?" active":"")+'" onclick="setTab(\'history\')">Histórico</button>'
-    + '</div>'
-    + '<div class="panel'+(state.tab==="pending"?" active":"")+'" id="panelPending">'+renderPending()+'</div>'
-    + '<div class="panel'+(state.tab==="edit"?" active":"")+'" id="panelEdit">'+renderEdit()+'</div>'
-    + '<div class="panel'+(state.tab==="history"?" active":"")+'" id="panelHistory">'+renderHistory()+'</div>'
-    + '</div>';
-}
-window.setTab = function(t){state.tab=t;renderApp()}
+  var pc=state.pending.length;
+  var treeHTML='<section class="section"><div class="section-head"><span class="section-dot"></span><h3 class="section-title">Ascendência</h3><span class="section-sub">Bisavós</span></div><div class="section-body"><ul class="tree-branch root">'+(state.data.asc||[]).map(function(n,i,a){return nodeHTML(n,null,i,a)}).join("")+'</ul></div></section>'
+    +'<section class="section"><div class="section-head"><span class="section-dot"></span><h3 class="section-title">Descendência</h3><span class="section-sub">8 ramos · '+countPeople(state.data.tree)+' pessoas</span></div><div class="section-body"><ul class="tree-branch root">'+nodeHTML(state.data.tree,null,0,null)+'</ul></div></section>';
+  var panelHTML='<div class="stat-row"><div class="stat"><b>'+pc+'</b><span>Pendentes</span></div><div class="stat"><b>'+state.history.filter(function(x){return x.status==="approved"}).length+'</b><span>Aprovadas</span></div><div class="stat"><b>'+state.history.filter(function(x){return x.status==="rejected"}).length+'</b><span>Rejeitadas</span></div></div>'
+    +'<div class="tabs"><button class="tab'+(state.tab==="pending"?" active":"")+'" onclick="setTab(\'pending\')">Pendentes'+(pc?'<span class="cnt">'+pc+'</span>':'')+'</button><button class="tab'+(state.tab==="history"?" active":"")+'" onclick="setTab(\'history\')">Histórico</button></div>'
+    +'<div class="panel-body">'+(state.tab==="pending"?panelPending():panelHistory())+'</div>';
 
-function renderPending(){
-  if(!state.pending.length) return '<div class="empty">Nenhuma sugestão pendente.<br>Tudo em dia! 🎉</div>';
-  return state.pending.map(it=>{
-    const who='<span class="who">'+(it.author?esc(it.author):"anónimo")+' · '+fmtD(it.created_at)+'</span>';
-    if(it.type==="rename"){
-      return '<div class="item"><div class="item-top"><span class="tag rename">Correção de nome</span>'+who+'</div>'
-        +'<div class="item-change"><span class="from">'+esc(it.node_name)+'</span> → <span class="to">'+esc(it.proposed)+'</span></div>'
-        +'<div class="item-actions"><button class="btn ok sm" onclick="approve(\''+it.id+'\')">Aprovar</button><button class="btn danger sm" onclick="reject(\''+it.id+'\')">Rejeitar</button></div></div>';
-    }
-    return '<div class="item"><div class="item-top"><span class="tag note">Observação</span>'+who+'</div>'
-      +'<div style="font-weight:600;font-size:14px;margin-bottom:4px">Sobre: '+esc(it.node_name)+'</div>'
-      +'<div class="item-change">'+esc(it.text)+'</div>'
-      +'<div class="item-actions"><button class="btn ok sm" onclick="approve(\''+it.id+'\')">Aprovar</button><button class="btn danger sm" onclick="reject(\''+it.id+'\')">Rejeitar</button></div></div>';
-  }).join("");
+  document.getElementById("app").innerHTML=
+    '<header class="header"><div class="header-icon">🌱</div><div><h1>Painel Admin</h1><small>Carvalho & Batista</small></div><a href="index.html">Ver site →</a></header>'
+    +'<div class="layout">'
+    +'<div class="tree-pane"><div class="toolbar"><button class="btn secondary sm" onclick="expandAll()">Expandir tudo</button><button class="btn secondary sm" onclick="collapseAll()">Recolher tudo</button></div>'+treeHTML+'</div>'
+    +'<div class="panel-pane">'+panelHTML+'</div>'
+    +'</div>';
 }
-function renderHistory(){
-  if(!state.history.length) return '<div class="empty">Nenhuma decisão registada ainda.</div>';
-  return state.history.map(it=>{
-    const tag=it.status==="approved"?'<span class="tag approved">Aprovada</span>':'<span class="tag rejected">Rejeitada</span>';
-    const desc=it.type==="rename"?esc(it.node_name)+' → '+esc(it.proposed):esc(it.node_name)+': '+esc(it.text||"").slice(0,60);
-    return '<div class="item"><div class="item-top">'+tag+'<span class="who">'+fmtD(it.created_at)+'</span></div><div style="font-size:13px;color:var(--text2)">'+desc+'</div></div>';
-  }).join("");
-}
-function renderEdit(){
-  const t=(n,parent,idx,sibs)=>{
-    const kids=n.children||[];const open=state.expanded.has(n.id);const hasK=kids.length>0;
-    const isRoot=n.id==="t"||/^a\d+$/.test(n.id);
-    let cH="";if(hasK&&open){cH='<ul class="tree-branch">'+kids.map((c,i)=>t(c,n,i,kids)).join("")+'</ul>'}
-    const up=idx>0, down=sibs&&idx<sibs.length-1;
-    const tools='<div class="node-tools">'
-      +'<button class="node-btn" onclick="moveSib(\''+n.id+'\',-1)" title="Subir" '+(up?"":"disabled")+'>↑</button>'
-      +'<button class="node-btn" onclick="moveSib(\''+n.id+'\',1)" title="Descer" '+(down?"":"disabled")+'>↓</button>'
-      +'<button class="node-btn mv" onclick="moveTo(\''+n.id+'\')" title="Mover para outro pai">⇄</button>'
-      +'<button class="node-add" onclick="addChild(\''+n.id+'\')" title="Adicionar filho">+</button>'
-      +(isRoot?'':'<button class="node-btn del" onclick="delNode(\''+n.id+'\')" title="Excluir">×</button>')
-      +'</div>';
-    const grip=isRoot?'':'<span class="node-grip" title="Arraste para mover">⋮⋮</span>';
-    return '<li class="tree-item" data-id="'+n.id+'"><div class="node" '+(isRoot?'':'draggable="true"')+' data-id="'+n.id+'"><button class="node-tog'+(open?" open":"")+(hasK?"":" leaf")+'" onclick="tog(\''+n.id+'\')">›</button>'+grip+'<span class="node-name" onclick="editName(\''+n.id+'\')">'+esc(n.name)+'</span>'+tools+'</div>'+cH+'</li>';
-  };
-  return '<p class="edit-hint">Clique num nome para editar. <kbd>+</kbd> adiciona abaixo · <kbd>↑↓</kbd> reordena · <kbd>⇄</kbd> move para outro pai · <kbd>×</kbd> exclui. Ou <strong>arraste</strong> pelo <kbd>⋮⋮</kbd>.</p>'
-    +'<div style="margin-bottom:8px;font-weight:700;font-size:13px;color:var(--text3);text-transform:uppercase;letter-spacing:.4px">Ascendência</div>'
-    +'<ul class="tree tree-branch root">'+(state.data.asc||[]).map((n,i,a)=>t(n,null,i,a)).join("")+'</ul>'
-    +'<div style="margin:20px 0 8px;font-weight:700;font-size:13px;color:var(--text3);text-transform:uppercase;letter-spacing:.4px">Descendência</div>'
-    +'<ul class="tree tree-branch root">'+t(state.data.tree,null,0,null)+'</ul>';
-}
-window.tog = function(id){state.expanded.has(id)?state.expanded.delete(id):state.expanded.add(id);document.getElementById("panelEdit").innerHTML=renderEdit()}
+window.setTab=function(t){state.tab=t;renderAll()}
+window.expandAll=function(){Object.keys(nById).forEach(function(id){if((nById[id].children||[]).length)state.expanded.add(id)});renderAll()}
+window.collapseAll=function(){state.expanded=new Set();renderAll()}
 
-window.approve = async function(id){
-  const it=state.pending.find(x=>x.id===id);if(!it)return;
-  const n=nById[it.node_id];
-  if(!n){toast("Pessoa não existe mais");await sb.from("pending_suggestions").update({status:"rejected"}).eq("id",id);loadAll();return}
+/* === ADMIN ACTIONS === */
+window.approve=async function(id){
+  var it=state.pending.find(function(x){return x.id===id});if(!it)return;
+  var n=nById[it.node_id];
+  if(!n){toast("Pessoa não encontrada");await sb.from("pending_suggestions").update({status:"rejected"}).eq("id",id);loadAll();return}
   if(it.type==="rename")n.name=it.proposed;
-  else (n.notes=n.notes||[]).push({text:it.text,author:it.author||"",at:Date.now()});
-  await save();
-  await sb.from("pending_suggestions").update({status:"approved"}).eq("id",id);
-  toast("Aprovado e aplicado!",true);
-  loadAll();
+  else(n.notes=n.notes||[]).push({text:it.text,author:it.author||"",at:Date.now()});
+  await save();await sb.from("pending_suggestions").update({status:"approved"}).eq("id",id);
+  toast("Aprovado!",true);loadAll();
 }
-window.reject = async function(id){
+window.reject=async function(id){
   await sb.from("pending_suggestions").update({status:"rejected"}).eq("id",id);
-  toast("Rejeitado");
-  loadAll();
+  toast("Rejeitado");loadAll();
 }
-window.editName = function(id){
-  const n=nById[id];if(!n)return;
-  modal('<h3>Editar nome</h3><input id="en" value="'+esc(n.name)+'"><div class="modal-actions"><button class="btn" onclick="closeM()">Cancelar</button><button class="btn primary" onclick="saveName(\''+id+'\')">Salvar</button></div>');
-  setTimeout(()=>document.getElementById("en").focus(),100);
+window.editName=function(id){
+  var n=nById[id];if(!n)return;
+  modal('<h3>Editar nome</h3><input id="en" value="'+esc(n.name)+'"><div class="mact"><button class="btn" onclick="closeM()">Cancelar</button><button class="btn primary" onclick="saveName(\''+id+'\')">Salvar</button></div>');
+  setTimeout(function(){document.getElementById("en").focus()},100);
 }
-window.saveName = async function(id){
-  const v=(document.getElementById("en").value||"").trim();if(!v){toast("Nome vazio");return}
-  nById[id].name=v;await save();toast("Nome atualizado",true);closeM();refreshEdit();
+window.saveName=async function(id){
+  var v=(document.getElementById("en").value||"").trim();if(!v){toast("Nome vazio");return}
+  nById[id].name=v;await save();toast("Atualizado",true);closeM();reindex();renderAll();
 }
-window.addChild = function(id){
-  const n=nById[id];if(!n)return;
-  modal('<h3>Adicionar pessoa</h3><p style="font-size:13px;color:var(--text2);margin:0 0 12px">Abaixo de: <strong>'+esc(n.name)+'</strong></p><input id="cn" placeholder="Nome da pessoa"><div class="modal-actions"><button class="btn" onclick="closeM()">Cancelar</button><button class="btn primary" onclick="saveChild(\''+id+'\')">Adicionar</button></div>');
-  setTimeout(()=>document.getElementById("cn").focus(),100);
+window.addChild=function(id){
+  var n=nById[id];if(!n)return;
+  modal('<h3>Adicionar pessoa</h3><p style="font-size:13px;color:var(--text2);margin:0 0 10px">Abaixo de: <strong>'+esc(n.name)+'</strong></p><input id="cn" placeholder="Nome"><div class="mact"><button class="btn" onclick="closeM()">Cancelar</button><button class="btn primary" onclick="saveChild(\''+id+'\')">Adicionar</button></div>');
+  setTimeout(function(){document.getElementById("cn").focus()},100);
 }
-window.saveChild = async function(id){
-  const v=(document.getElementById("cn").value||"").trim();if(!v){toast("Nome vazio");return}
-  const n=nById[id];(n.children=n.children||[]).push({name:v,meta:null,notes:[],children:[]});
-  assign(state.data.tree,"t");(state.data.asc||[]).forEach((x,i)=>assign(x,"a"+i));rebuild();
-  await save();toast("Pessoa adicionada",true);closeM();state.expanded.add(id);refreshEdit();
+window.saveChild=async function(id){
+  var v=(document.getElementById("cn").value||"").trim();if(!v){toast("Nome vazio");return}
+  var n=nById[id];(n.children=n.children||[]).push({name:v,meta:null,notes:[],children:[]});
+  reindex();await save();toast("Adicionado",true);closeM();state.expanded.add(id);renderAll();
 }
-
-// --- helpers de estrutura ---
-function reindex(){assign(state.data.tree,"t");(state.data.asc||[]).forEach((x,i)=>assign(x,"a"+i));rebuild()}
-function refreshEdit(){reindex();const p=document.getElementById("panelEdit");if(p)p.innerHTML=renderEdit()}
-function siblingsOf(id){ // devolve o array que contém o nó e o índice dele
-  if(/^a\d+$/.test(id)){const i=+id.slice(1);return{arr:state.data.asc,idx:i}}
-  const pid=pId[id];if(!pid)return null;
-  const arr=nById[pid].children;const idx=arr.findIndex(x=>x.id===id);return{arr,idx};
+window.moveSib=async function(id,dir){
+  var s=siblingsOf(id);if(!s)return;var arr=s.arr,idx=s.idx,j=idx+dir;
+  if(j<0||j>=arr.length)return;var tmp=arr[idx];arr[idx]=arr[j];arr[j]=tmp;
+  reindex();await save();toast("Reordenado",true);renderAll();
 }
-function isDescendant(ancId,maybeId){ // maybeId está dentro de ancId?
-  let cur=maybeId;while(cur){if(cur===ancId)return true;cur=pId[cur]}return false;
-}
-
-window.moveSib = async function(id,dir){
-  const s=siblingsOf(id);if(!s)return;const{arr,idx}=s;const j=idx+dir;
-  if(j<0||j>=arr.length)return;
-  const tmp=arr[idx];arr[idx]=arr[j];arr[j]=tmp;
-  await save();toast("Reordenado",true);refreshEdit();
-}
-
-window.delNode = function(id){
-  const n=nById[id];if(!n)return;
-  const kids=n.children||[];
+window.delNode=function(id){
+  var n=nById[id];if(!n)return;var kids=n.children||[];
   if(kids.length){
-    modal('<h3>Excluir "'+esc(n.name)+'"</h3><p style="font-size:13px;color:var(--text2);margin:0 0 16px">Esta pessoa tem '+kids.length+' descendente(s) direto(s). O que fazer com eles?</p>'
-      +'<div class="modal-actions" style="flex-direction:column"><button class="btn danger" onclick="doDel(\''+id+'\',\'all\')">Excluir tudo (a pessoa e a descendência)</button>'
-      +'<button class="btn primary" onclick="doDel(\''+id+'\',\'promote\')" style="margin-top:8px">Subir os filhos pro lugar dela</button>'
-      +'<button class="btn" onclick="closeM()" style="margin-top:8px">Cancelar</button></div>');
-  } else {
-    modal('<h3>Excluir "'+esc(n.name)+'"?</h3><p style="font-size:13px;color:var(--text2);margin:0 0 16px">Esta ação não pode ser desfeita.</p><div class="modal-actions"><button class="btn" onclick="closeM()">Cancelar</button><button class="btn danger" onclick="doDel(\''+id+'\',\'all\')">Excluir</button></div>');
+    modal('<h3>Excluir "'+esc(n.name)+'"</h3><p style="font-size:13px;color:var(--text2);margin:0 0 14px">Tem '+kids.length+' descendente(s). O que fazer?</p>'
+      +'<div class="mact" style="flex-direction:column;gap:8px"><button class="btn danger" onclick="doDel(\''+id+'\',\'all\')">Excluir tudo</button><button class="btn primary" onclick="doDel(\''+id+'\',\'up\')">Subir filhos pro lugar</button><button class="btn" onclick="closeM()">Cancelar</button></div>');
+  }else{
+    modal('<h3>Excluir "'+esc(n.name)+'"?</h3><p style="font-size:13px;color:var(--text2);margin:0 0 14px">Não pode ser desfeito.</p><div class="mact"><button class="btn" onclick="closeM()">Cancelar</button><button class="btn danger" onclick="doDel(\''+id+'\',\'all\')">Excluir</button></div>');
   }
 }
-window.doDel = async function(id,mode){
-  const s=siblingsOf(id);if(!s){closeM();return}const{arr,idx}=s;const n=arr[idx];
-  const kids=n.children||[];
-  if(mode==="promote"&&kids.length){arr.splice(idx,1,...kids)} // filhos ocupam o lugar
-  else{arr.splice(idx,1)}
-  await save();toast("Excluído",true);closeM();refreshEdit();
+window.doDel=async function(id,mode){
+  var s=siblingsOf(id);if(!s){closeM();return}var n=s.arr[s.idx],kids=n.children||[];
+  if(mode==="up"&&kids.length)s.arr.splice(s.idx,1,...kids);
+  else s.arr.splice(s.idx,1);
+  reindex();await save();toast("Excluído",true);closeM();renderAll();
+}
+window.moveToModal=function(id){
+  var n=nById[id];if(!n)return;
+  var opts=Object.values(nById).filter(function(x){return!isDesc(id,x.id)&&x.id!==pId[id]});
+  var list=opts.map(function(x){return'<div class="mvt" onclick="doMoveTo(\''+id+'\',\''+x.id+'\')">'+esc(x.name)+(x.meta?' <span style="color:var(--text3);font-size:11px">· '+esc(x.meta)+'</span>':'')+'</div>'}).join("");
+  modal('<h3>Mover "'+esc(n.name)+'"</h3><p style="font-size:13px;color:var(--text2);margin:0 0 6px">Escolha o novo pai:</p><div class="mvl">'+list+'</div><div class="mact"><button class="btn" onclick="closeM()">Cancelar</button></div>');
+}
+window.doMoveTo=async function(id,npid){
+  var s=siblingsOf(id);if(!s)return;var node=s.arr[s.idx];s.arr.splice(s.idx,1);
+  var np=nById[npid];(np.children=np.children||[]).push(node);
+  reindex();await save();toast("Movido",true);closeM();state.expanded.add(npid);renderAll();
 }
 
-window.moveTo = function(id){
-  const n=nById[id];if(!n)return;
-  // lista de possíveis novos pais: todos os nós que não são o próprio nem descendentes dele
-  const opts=Object.values(nById).filter(x=>!isDescendant(id,x.id)&&x.id!==pId[id]);
-  const list=opts.map(x=>'<div class="move-target" onclick="doMoveTo(\''+id+'\',\''+x.id+'\')">'+esc(x.name)+(x.meta?' <span style="color:var(--text3);font-size:12px">· '+esc(x.meta)+'</span>':'')+'</div>').join("");
-  modal('<h3>Mover "'+esc(n.name)+'"</h3><p style="font-size:13px;color:var(--text2);margin:0 0 4px">Escolha o novo pai (a pessoa passa a ficar abaixo dele):</p><div class="move-list">'+list+'</div><div class="modal-actions"><button class="btn" onclick="closeM()">Cancelar</button></div>');
-}
-window.doMoveTo = async function(id,newParentId){
-  const s=siblingsOf(id);if(!s)return;const{arr,idx}=s;const node=arr[idx];
-  arr.splice(idx,1); // remove da posição atual
-  const np=nById[newParentId];(np.children=np.children||[]).push(node);
-  await save();toast("Movido",true);closeM();state.expanded.add(newParentId);refreshEdit();
-}
-
-// --- drag and drop ---
-let dragId=null;
-document.addEventListener("dragstart",e=>{const nd=e.target.closest(".node[draggable=true]");if(!nd)return;dragId=nd.getAttribute("data-id");nd.classList.add("dragging");e.dataTransfer.effectAllowed="move"});
-document.addEventListener("dragend",e=>{document.querySelectorAll(".dragging").forEach(x=>x.classList.remove("dragging"));document.querySelectorAll(".drop-before,.drop-after,.drop-into").forEach(x=>x.classList.remove("drop-before","drop-after","drop-into"));dragId=null});
-document.addEventListener("dragover",e=>{
-  const li=e.target.closest(".tree-item");if(!li||!dragId)return;
-  const tid=li.getAttribute("data-id");if(!tid||tid===dragId||isDescendant(dragId,tid))return;
+/* === DRAG & DROP === */
+var dragId=null;
+document.addEventListener("dragstart",function(e){var nd=e.target.closest(".node-row[draggable]");if(!nd)return;dragId=nd.getAttribute("data-id");nd.classList.add("dragging");e.dataTransfer.effectAllowed="move"});
+document.addEventListener("dragend",function(){document.querySelectorAll(".dragging").forEach(function(x){x.classList.remove("dragging")});document.querySelectorAll(".drop-before,.drop-after,.drop-into").forEach(function(x){x.classList.remove("drop-before","drop-after","drop-into")});dragId=null});
+document.addEventListener("dragover",function(e){
+  var li=e.target.closest(".tree-item");if(!li||!dragId)return;
+  var tid=li.getAttribute("data-id");if(!tid||tid===dragId||isDesc(dragId,tid))return;
   e.preventDefault();
-  document.querySelectorAll(".drop-before,.drop-after,.drop-into").forEach(x=>x.classList.remove("drop-before","drop-after","drop-into"));
-  const r=li.querySelector(".node").getBoundingClientRect();const y=e.clientY-r.top;
-  if(y<r.height*0.3)li.classList.add("drop-before");
-  else if(y>r.height*0.7)li.classList.add("drop-after");
+  document.querySelectorAll(".drop-before,.drop-after,.drop-into").forEach(function(x){x.classList.remove("drop-before","drop-after","drop-into")});
+  var r=li.querySelector(".node-row").getBoundingClientRect(),y=e.clientY-r.top;
+  if(y<r.height*.3)li.classList.add("drop-before");
+  else if(y>r.height*.7)li.classList.add("drop-after");
   else li.classList.add("drop-into");
 });
-document.addEventListener("drop",async e=>{
-  const li=e.target.closest(".tree-item");if(!li||!dragId)return;
-  const tid=li.getAttribute("data-id");if(!tid||tid===dragId||isDescendant(dragId,tid)){return}
+document.addEventListener("drop",async function(e){
+  var li=e.target.closest(".tree-item");if(!li||!dragId)return;
+  var tid=li.getAttribute("data-id");if(!tid||tid===dragId||isDesc(dragId,tid))return;
   e.preventDefault();
-  const mode=li.classList.contains("drop-into")?"into":(li.classList.contains("drop-before")?"before":"after");
-  const src=siblingsOf(dragId);if(!src)return;const node=src.arr[src.idx];
-  if(mode==="into"){
-    src.arr.splice(src.idx,1);
-    const np=nById[tid];(np.children=np.children||[]).push(node);
-    state.expanded.add(tid);
-  } else {
-    // inserir como irmão de tid
-    const tgt=siblingsOf(tid);if(!tgt){return}
-    src.arr.splice(src.idx,1);
-    // recalcula índice do alvo (pode ter mudado se mesmo array)
-    const tgt2=siblingsOf(tid);const at=mode==="before"?tgt2.idx:tgt2.idx+1;
-    tgt2.arr.splice(at,0,node);
-  }
-  await save();toast("Movido",true);refreshEdit();
+  var mode=li.classList.contains("drop-into")?"into":(li.classList.contains("drop-before")?"before":"after");
+  var src=siblingsOf(dragId);if(!src)return;var node=src.arr[src.idx];
+  if(mode==="into"){src.arr.splice(src.idx,1);var np=nById[tid];(np.children=np.children||[]).push(node);state.expanded.add(tid)}
+  else{src.arr.splice(src.idx,1);reindex();var tgt=siblingsOf(tid);if(!tgt)return;var at=mode==="before"?tgt.idx:tgt.idx+1;tgt.arr.splice(at,0,node)}
+  reindex();await save();toast("Movido",true);renderAll();
 });
 
-document.getElementById("modal").addEventListener("click",e=>{if(e.target===document.getElementById("modal"))closeM()});
-document.addEventListener("keydown",e=>{if(e.key==="Escape")closeM()});
+/* === TOGGLE & EVENTS === */
+document.addEventListener("click",function(e){
+  var t=e.target.closest("[data-act]");if(!t)return;
+  var act=t.getAttribute("data-act"),id=t.getAttribute("data-id");
+  if(act==="toggle"){state.expanded.has(id)?state.expanded.delete(id):state.expanded.add(id);renderAll()}
+});
+document.getElementById("modal").addEventListener("click",function(e){if(e.target===document.getElementById("modal"))closeM()});
+document.addEventListener("keydown",function(e){if(e.key==="Escape")closeM()});
 
-renderApp();
+renderLogin();
 </script>
 </body>
 </html>
