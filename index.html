@@ -1,240 +1,887 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Árvore Genealógica - Família Carvalho e Batista</title>
-    <style>
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            line-height: 1.6;
-            margin: 40px auto;
-            max-width: 900px;
-            color: #333;
-            background-color: #f9f9f9;
-        }
-        h1 {
-            color: #2c3e50;
-            text-align: center;
-            border-bottom: 2px solid #2c3e50;
-            padding-bottom: 10px;
-        }
-        h2 {
-            color: #34495e;
-            margin-top: 30px;
-        }
-        .tree-container {
-            background: #fff;
-            padding: 20px 40px;
-            border-radius: 8px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-        }
-        ul {
-            list-style-type: none;
-            border-left: 2px solid #bdc3c7;
-            padding-left: 20px;
-            margin-left: 10px;
-        }
-        li {
-            margin: 8px 0;
-            position: relative;
-        }
-        li::before {
-            content: "";
-            position: absolute;
-            top: 12px;
-            left: -20px;
-            width: 15px;
-            border-bottom: 2px solid #bdc3c7;
-        }
-        .genearca {
-            font-weight: bold;
-            color: #c0392b;
-            font-size: 1.1em;
-        }
-        .ramo {
-            font-weight: bold;
-            color: #2980b9;
-            margin-top: 15px;
-        }
-        .nome {
-            font-weight: 600;
-        }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Árvore Genealógica — Família Carvalho & Batista</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400..700;1,9..144,400&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#f6f1e8; --bg2:#efe7d8;
+    --surface:#fffdf8; --surface-2:#faf5ec;
+    --ink:#2a2521; --muted:#6c6358; --faint:#938a7d;
+    --line:#ddd3c2; --line-strong:#c9bda7;
+    --green:#3f6b4e; --green-d:#345a41; --green-l:#e6efe7;
+    --gold:#a9773a; --gold-l:#f3e8d5;
+    --danger:#b0432e; --danger-l:#f7e6e1;
+    --radius:14px; --radius-sm:10px;
+    --shadow:0 1px 2px rgba(42,37,33,.05),0 6px 20px rgba(42,37,33,.06);
+    --shadow-lg:0 10px 40px rgba(42,37,33,.18);
+    --sans:'Inter',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;
+    --serif:'Fraunces',Georgia,'Times New Roman',serif;
+    --tap:44px;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0}
+  body{
+    font-family:var(--sans); color:var(--ink); line-height:1.55;
+    background:
+      radial-gradient(1200px 600px at 100% -10%, #fff 0%, transparent 55%),
+      radial-gradient(900px 500px at -10% 110%, var(--green-l) 0%, transparent 50%),
+      var(--bg);
+    -webkit-font-smoothing:antialiased; min-height:100vh;
+  }
+  .wrap{max-width:1000px;margin:0 auto;padding:0 16px 80px}
+
+  /* ---------- Top bar ---------- */
+  .topbar{position:sticky;top:0;z-index:40;background:rgba(246,241,232,.86);
+    backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
+  .topbar-in{max-width:1000px;margin:0 auto;padding:10px 16px;display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+  .brand{display:flex;align-items:center;gap:10px;margin-right:auto;min-width:0}
+  .brand .mark{flex:0 0 auto;width:38px;height:38px;border-radius:11px;background:var(--green);
+    display:grid;place-items:center;box-shadow:var(--shadow)}
+  .brand h1{font-family:var(--serif);font-size:1.02rem;font-weight:600;margin:0;line-height:1.15;letter-spacing:.1px}
+  .brand small{color:var(--muted);font-size:.72rem;display:block;font-weight:500}
+  .search{position:relative;flex:1 1 220px;max-width:340px}
+  .search input{width:100%;height:var(--tap);padding:0 14px 0 40px;border:1px solid var(--line-strong);
+    border-radius:999px;background:var(--surface);font:inherit;font-size:.92rem;color:var(--ink)}
+  .search input:focus{outline:2px solid var(--green);outline-offset:1px;border-color:var(--green)}
+  .search svg{position:absolute;left:13px;top:50%;transform:translateY(-50%);color:var(--faint);pointer-events:none}
+  .btn{display:inline-flex;align-items:center;justify-content:center;gap:7px;min-height:var(--tap);
+    padding:0 15px;border-radius:11px;border:1px solid var(--line-strong);background:var(--surface);
+    color:var(--ink);font:inherit;font-weight:600;font-size:.86rem;cursor:pointer;transition:transform .15s,background .15s,border-color .15s,box-shadow .15s}
+  .btn:hover{background:var(--surface-2);border-color:var(--faint)}
+  .btn:active{transform:translateY(1px)}
+  .btn:focus-visible{outline:2px solid var(--green);outline-offset:2px}
+  .btn.primary{background:var(--green);border-color:var(--green);color:#fff}
+  .btn.primary:hover{background:var(--green-d);border-color:var(--green-d)}
+  .btn.ghost{border-color:transparent;background:transparent}
+  .btn.ghost:hover{background:var(--surface-2)}
+  .btn.sm{min-height:36px;padding:0 12px;font-size:.8rem}
+  .btn.danger{color:var(--danger);border-color:var(--danger)}
+  .btn.danger:hover{background:var(--danger-l)}
+  .btn.ok{background:var(--green);border-color:var(--green);color:#fff}
+  .btn.ok:hover{background:var(--green-d)}
+  .icon-btn{width:var(--tap);height:var(--tap);padding:0;border-radius:11px}
+  .chip{display:inline-flex;align-items:center;gap:6px;height:32px;padding:0 11px;border-radius:999px;
+    font-size:.78rem;font-weight:600;background:var(--gold-l);color:#7a531f;border:1px solid #e6d3af;cursor:pointer}
+  .chip.on{background:var(--green);color:#fff;border-color:var(--green)}
+
+  /* ---------- Hero / stats ---------- */
+  .hero{text-align:center;padding:34px 8px 10px}
+  .hero h2{font-family:var(--serif);font-weight:600;font-size:clamp(1.6rem,4.5vw,2.5rem);margin:0 0 6px;letter-spacing:.2px}
+  .hero p{color:var(--muted);max-width:560px;margin:0 auto;font-size:.96rem}
+  .stats{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin:18px 0 6px}
+  .stat{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:12px 18px;min-width:104px;box-shadow:var(--shadow)}
+  .stat b{font-family:var(--serif);display:block;font-size:1.5rem;line-height:1;color:var(--green)}
+  .stat span{font-size:.74rem;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:.4px}
+
+  .toolbar{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin:14px 0 4px}
+
+  /* ---------- Sections ---------- */
+  .section{background:var(--surface);border:1px solid var(--line);border-radius:20px;box-shadow:var(--shadow);
+    padding:8px 6px 14px;margin-top:20px;overflow:hidden}
+  .section-head{display:flex;align-items:center;gap:10px;padding:12px 14px 6px}
+  .section-head .dot{width:9px;height:9px;border-radius:50%;background:var(--gold)}
+  .section-head h3{font-family:var(--serif);font-weight:600;margin:0;font-size:1.12rem}
+  .section-head .sub{color:var(--muted);font-size:.8rem;margin-left:auto}
+
+  /* ---------- Tree ---------- */
+  .tree{padding:4px 6px 2px}
+  ul.branch{list-style:none;margin:0;padding-left:26px;border-left:2px solid var(--line);margin-left:20px}
+  ul.branch.root{border-left:none;padding-left:0;margin-left:0}
+  li.node{position:relative;margin:5px 0}
+  li.node.root-li>ul.branch{margin-top:8px}
+  ul.branch>li.node::before{content:"";position:absolute;top:24px;left:-26px;width:20px;height:2px;background:var(--line)}
+  .row{display:flex;align-items:center;gap:9px;padding:6px 8px;border-radius:12px;transition:background .15s}
+  .row:hover{background:var(--surface-2)}
+  .row.match{background:var(--gold-l)}
+  .twist{flex:0 0 auto;width:26px;height:26px;border-radius:8px;border:1px solid transparent;background:transparent;
+    display:grid;place-items:center;cursor:pointer;color:var(--muted);transition:transform .18s,background .15s}
+  .twist:hover{background:var(--green-l);color:var(--green)}
+  .twist.open{transform:rotate(90deg)}
+  .twist.leaf{cursor:default;visibility:hidden}
+  .avatar{flex:0 0 auto;width:34px;height:34px;border-radius:10px;display:grid;place-items:center;
+    font-size:.74rem;font-weight:700;color:#fff;letter-spacing:.3px}
+  .person{flex:1 1 auto;min-width:0;text-align:left;background:transparent;border:none;font:inherit;
+    cursor:pointer;padding:4px 2px;color:var(--ink);border-radius:8px}
+  .person:focus-visible{outline:2px solid var(--green);outline-offset:2px}
+  .person .nm{font-weight:600;font-size:.95rem;display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .person .mt{color:var(--muted);font-size:.76rem;display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .badge-note{flex:0 0 auto;display:inline-flex;align-items:center;gap:4px;height:22px;padding:0 8px;border-radius:999px;
+    background:var(--green-l);color:var(--green-d);font-size:.72rem;font-weight:700}
+  .kind-root>.row{background:linear-gradient(90deg,var(--green) 0%,var(--green-d) 100%);color:#fff;padding:12px 12px;border-radius:14px}
+  .kind-root>.row .person .nm,.kind-root>.row .person .mt{color:#fff}
+  .kind-root>.row .twist{color:#fff}
+  .kind-root>.row .twist:hover{background:rgba(255,255,255,.18)}
+  .kind-ramo>.row .nm{font-family:var(--serif);font-size:1rem}
+  .kind-ramo>.row{background:var(--surface-2)}
+  .kind-uniao .avatar{background:transparent!important;color:var(--gold);border:1px dashed var(--line-strong)}
+  .kind-uniao .person .nm{font-style:italic;font-weight:500;color:var(--muted)}
+  .hidden{display:none!important}
+  mark{background:#ffe08a;color:inherit;border-radius:3px;padding:0 1px}
+
+  /* ---------- Overlay / sheet / modal ---------- */
+  .overlay{position:fixed;inset:0;z-index:60;background:rgba(30,26,22,.42);backdrop-filter:blur(2px);
+    display:flex;align-items:flex-end;justify-content:center;opacity:0;pointer-events:none;transition:opacity .2s}
+  .overlay.show{opacity:1;pointer-events:auto}
+  .sheet{background:var(--surface);width:100%;max-width:560px;border-radius:22px 22px 0 0;box-shadow:var(--shadow-lg);
+    max-height:90vh;overflow:auto;transform:translateY(16px);transition:transform .22s;padding:6px 0 20px}
+  .overlay.show .sheet{transform:translateY(0)}
+  .sheet-grip{width:42px;height:5px;border-radius:3px;background:var(--line-strong);margin:10px auto 4px}
+  .sheet-in{padding:8px 20px 4px}
+  .sheet h3{font-family:var(--serif);margin:6px 0 2px;font-size:1.35rem}
+  .sheet .path{color:var(--faint);font-size:.78rem;margin-bottom:14px}
+  .field{margin:12px 0}
+  .field label{display:block;font-size:.8rem;font-weight:600;color:var(--muted);margin-bottom:6px}
+  .field input,.field textarea{width:100%;padding:11px 13px;border:1px solid var(--line-strong);border-radius:11px;
+    font:inherit;font-size:.95rem;background:var(--surface-2);color:var(--ink);resize:vertical}
+  .field input:focus,.field textarea:focus{outline:2px solid var(--green);outline-offset:1px;border-color:var(--green);background:#fff}
+  .hint{font-size:.76rem;color:var(--faint);margin-top:6px;display:flex;gap:6px;align-items:flex-start}
+  .actions{display:flex;gap:9px;flex-wrap:wrap;margin-top:16px}
+  .actions .btn{flex:1 1 auto}
+  .divider{height:1px;background:var(--line);margin:16px 0}
+  .notes-list{margin:6px 0 0}
+  .note-item{background:var(--surface-2);border:1px solid var(--line);border-radius:12px;padding:10px 12px;margin:8px 0}
+  .note-item p{margin:0 0 4px;font-size:.9rem}
+  .note-item .meta{font-size:.72rem;color:var(--faint)}
+  .empty{color:var(--faint);font-size:.86rem;font-style:italic;padding:6px 0}
+  .admin-only{display:none}
+  body.is-admin .admin-only{display:flex}
+  body.is-admin .admin-only.block{display:block}
+
+  /* review queue */
+  .q-item{border:1px solid var(--line);border-radius:14px;padding:13px 14px;margin:10px 0;background:var(--surface-2)}
+  .q-top{display:flex;align-items:center;gap:8px;margin-bottom:8px;flex-wrap:wrap}
+  .tag{font-size:.68rem;font-weight:700;text-transform:uppercase;letter-spacing:.4px;padding:3px 8px;border-radius:999px}
+  .tag.rename{background:var(--gold-l);color:#7a531f}
+  .tag.note{background:var(--green-l);color:var(--green-d)}
+  .q-item .who{color:var(--faint);font-size:.74rem;margin-left:auto}
+  .q-item .target{font-weight:600;font-size:.9rem}
+  .q-change{background:#fff;border:1px dashed var(--line-strong);border-radius:10px;padding:9px 11px;margin:8px 0;font-size:.9rem}
+  .q-change .from{color:var(--danger);text-decoration:line-through;opacity:.75}
+  .q-change .to{color:var(--green-d);font-weight:600}
+  .q-actions{display:flex;gap:8px;margin-top:6px}
+
+  /* toast */
+  .toast-wrap{position:fixed;left:0;right:0;bottom:22px;z-index:80;display:flex;flex-direction:column;align-items:center;gap:8px;pointer-events:none}
+  .toast{background:var(--ink);color:#fff;padding:11px 18px;border-radius:999px;font-size:.86rem;font-weight:500;
+    box-shadow:var(--shadow-lg);opacity:0;transform:translateY(10px);transition:opacity .25s,transform .25s;max-width:90vw}
+  .toast.show{opacity:1;transform:translateY(0)}
+  .toast.ok{background:var(--green-d)}
+  .toast.err{background:var(--danger)}
+
+  .footer{text-align:center;color:var(--faint);font-size:.8rem;margin-top:34px;line-height:1.7}
+  .footer a{color:var(--green-d);text-decoration:none;font-weight:600}
+  .storage-note{max-width:640px;margin:16px auto 0;background:var(--gold-l);border:1px solid #e6d3af;color:#6f4c1c;
+    border-radius:12px;padding:10px 14px;font-size:.8rem;display:none}
+  .storage-note.show{display:block}
+
+  @media (min-width:720px){
+    .overlay{align-items:center}
+    .sheet{border-radius:22px;transform:translateY(0) scale(.98)}
+    .overlay.show .sheet{transform:scale(1)}
+    .sheet-grip{display:none}
+    .sheet-in{padding-top:16px}
+  }
+  @media (prefers-reduced-motion:reduce){
+    *{transition:none!important;animation:none!important}
+  }
+</style>
 </head>
 <body>
-    <div class="tree-container">
-        <h1>Árvore Genealógica: Família Carvalho e Batista</h1>
 
-        <h2>1. Ascendência e Origens (Bisavós e Tios-Avós)</h2>
-        <ul>
-            <li><span class="nome">Linhagem Patrilinear (Pais de Aires):</span> Nomes desconhecidos (Vila Nova de Famalicão, Portugal)</li>
-            <li><span class="nome">Linhagem Matrilinear (Pais de Rosa):</span>
-                <ul>
-                    <li>Pai: Nome desconhecido (Transmontano, Portugal)</li>
-                    <li>Mãe: Nome desconhecido (Angolana)</li>
-                </ul>
-            </li>
-            <li><span class="nome">Tios-Avós Paternos (Irmãos de Aires):</span> Amélia de Carvalho e pelo menos um irmão varão</li>
-        </ul>
-
-        <h2>2. Genearcas Centrais (Avós)</h2>
-        <ul>
-            <li class="genearca">Aires José de Carvalho & Rosa Batista</li>
-        </ul>
-
-        <h2>3. Descendência (Os 8 Ramos)</h2>
-        <ul>
-            <!-- Ramo 1 -->
-            <li class="ramo">Ramo 1: Mª Amélia Carvalho & Armindo
-                <ul>
-                    <li><span class="nome">Mª Fernanda (Nina)</span>
-                        <ul>
-                            <li><em>com Afonso:</em> Bruno</li>
-                            <li><em>com Rogério:</em>
-                                <ul>
-                                    <li><span class="nome">Marília & Benjamim</span>
-                                        <ul>
-                                            <li>Cláudia & Ricardo ➔ Iara (& Bruno), Ivo</li>
-                                            <li>Liliana & Nuno ➔ João, Paula</li>
-                                        </ul>
-                                    </li>
-                                    <li><span class="nome">Manuel & Ana</span>
-                                        <ul>
-                                            <li>Rogério & Claudia ➔ Gonçalo</li>
-                                        </ul>
-                                    </li>
-                                    <li><span class="nome">Hermínia Isolette</span></li>
-                                </ul>
-                            </li>
-                        </ul>
-                    </li>
-                </ul>
-            </li>
-
-            <!-- Ramo 2 -->
-            <li class="ramo">Ramo 2: Francisco Carvalho & Lourdes
-                <ul>
-                    <li><span class="nome">Carmo & Francisco</span>
-                        <ul>
-                            <li>Ana Francisca & Tom ➔ Diana</li>
-                            <li>Francisco Aires</li>
-                            <li>Manuel Francisco</li>
-                        </ul>
-                    </li>
-                    <li><span class="nome">Edna</span>
-                        <ul>
-                            <li><em>com Armando:</em>
-                                <ul>
-                                    <li>Sónia & Tony ➔ Lourdinhas, Kiko</li>
-                                    <li>Ana Paula & António Eugénio ➔
-                                        <ul>
-                                            <li>Daniela & Nani ➔ Lucas, Catarina, Beatriz</li>
-                                            <li>Paulo André & Melanie ➔ Leonardo, Adriana, Sienna</li>
-                                            <li>Marcos</li>
-                                        </ul>
-                                    </li>
-                                    <li>Margarida (Guida) & Zé ➔
-                                        <ul>
-                                            <li>Zé & Maria ➔ António, Eva</li>
-                                            <li>Margarida</li>
-                                            <li>Sofia Margarida</li>
-                                        </ul>
-                                    </li>
-                                    <li>Vanda & Marcos ➔ Diogo, Dennis</li>
-                                </ul>
-                            </li>
-                            <li><em>com Ricardo:</em>
-                                <ul>
-                                    <li>Rafaela ➔ Filipe</li>
-                                </ul>
-                            </li>
-                        </ul>
-                    </li>
-                </ul>
-            </li>
-
-            <!-- Ramo 3 -->
-            <li class="ramo">Ramo 3: Lucília Carvalho & Constantino
-                <ul>
-                    <li><span class="nome">Nelson & Mariazinha</span>
-                        <ul>
-                            <li>Solange & Tobi ➔ Rafael, Lucky, Aliej</li>
-                            <li>Tommy</li>
-                            <li>Stephanie</li>
-                            <li>Nicolas</li>
-                        </ul>
-                    </li>
-                    <li><span class="nome">Leno</span></li>
-                    <li><span class="nome">Carlos Osvaldo & Manuela</span> ➔ Susana Raquel</li>
-                    <li><span class="nome">César</span> ➔ Heliana</li>
-                </ul>
-            </li>
-
-            <!-- Ramo 4 -->
-            <li class="ramo">Ramo 4: Alice Carvalho & Armindo
-                <ul>
-                    <li><span class="nome">Fernando Hitler & Mª Teresa</span>
-                        <ul>
-                            <li>Vera ➔ Carlos Miguel, Rodrigo, Lucas</li>
-                            <li>Fernando</li>
-                            <li>Aires</li>
-                        </ul>
-                    </li>
-                    <li><span class="nome">Elsa & Queirós</span>
-                        <ul>
-                            <li>Miguel</li>
-                            <li>Ivo & Ana Cristina ➔ Thelma, Tomas</li>
-                            <li>Nuno & Luísa ➔ Tiago</li>
-                            <li>Hildeberto Jorge & Tânia</li>
-                        </ul>
-                    </li>
-                    <li><span class="nome">Sandra</span>
-                        <ul>
-                            <li><em>com Ângelo:</em> Ricardo César, João Filipe, Ângela (& Tomás ➔ Guilherme)</li>
-                            <li><em>com Otelo:</em> Martim</li>
-                        </ul>
-                    </li>
-                </ul>
-            </li>
-
-            <!-- Ramo 5 -->
-            <li class="ramo">Ramo 5: Mª Lourdes (Lurdes) Carvalho & Zé
-                <ul>
-                    <li><span class="nome">Célia & João Lemos</span> ➔ Marina ➔ Maria Vitória</li>
-                    <li><span class="nome">Fernando</span></li>
-                    <li><span class="nome">Carla & Carlos</span>
-                        <ul>
-                            <li>Beatriz ➔ Daniel</li>
-                            <li>Pedro</li>
-                        </ul>
-                    </li>
-                </ul>
-            </li>
-
-            <!-- Ramo 6 -->
-            <li class="ramo">Ramo 6: Emília Carvalho & Mário
-                <ul>
-                    <li><span class="nome">Carlos Jorge & Patrícia</span></li>
-                </ul>
-            </li>
-
-            <!-- Ramo 7 -->
-            <li class="ramo">Ramo 7: Fernando Edgar José de Carvalho & Maria Ana
-                <ul>
-                    <li><span class="nome">Ana Sofia Gonçalves de Carvalho & Rui</span> ➔ Inês, Gonçalo</li>
-                    <li><span class="nome">Rui Edgar & Davi</span></li>
-                </ul>
-            </li>
-
-            <!-- Ramo 8 -->
-            <li class="ramo">Ramo 8: Isabel Celeste Carvalho & Joaquim
-                <ul>
-                    <li><span class="nome">Vera Mónica & Adrian</span> ➔ Lara, Liam</li>
-                    <li><span class="nome">Ana Cristina & Gonçalo</span> ➔ Maria Rita</li>
-                </ul>
-            </li>
-        </ul>
+<header class="topbar">
+  <div class="topbar-in">
+    <div class="brand">
+      <span class="mark" aria-hidden="true">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22V12"/><path d="M12 12c0-3 2-5 5-5"/><path d="M12 14c0-3-2-4-5-4"/><circle cx="12" cy="8" r="3"/><path d="M8 22h8"/></svg>
+      </span>
+      <div>
+        <h1>Carvalho &amp; Batista</h1>
+        <small>Árvore genealógica colaborativa</small>
+      </div>
     </div>
+    <div class="search">
+      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m21 21-4-4"/></svg>
+      <input id="search" type="search" placeholder="Buscar por nome…" aria-label="Buscar pessoa pelo nome" autocomplete="off">
+    </div>
+    <span class="chip" id="pendingChip" title="Sugestões aguardando revisão">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M12 8v4l3 2"/><circle cx="12" cy="12" r="9"/></svg>
+      <span id="pendingCount">0</span> em análise
+    </span>
+    <button class="btn sm admin-only ok" id="btnQueue" type="button">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3 8-8"/><path d="M20 12v6a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h9"/></svg>
+      Revisar
+    </button>
+    <button class="btn sm icon-btn" id="btnAdmin" type="button" aria-label="Área do administrador" title="Área do administrador">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="11" width="16" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg>
+    </button>
+  </div>
+</header>
+
+<div class="wrap">
+  <section class="hero">
+    <h2>A nossa família, um ramo de cada vez</h2>
+    <p>Navegue pela descendência de <strong>Aires José de Carvalho</strong> e <strong>Rosa Batista</strong>. Toque em qualquer pessoa para ver detalhes, sugerir uma correção de nome ou deixar uma observação. Tudo passa pela sua aprovação antes de entrar na árvore.</p>
+    <div class="stats" id="stats"></div>
+    <div class="toolbar">
+      <button class="btn sm" id="btnExpand" type="button">Expandir tudo</button>
+      <button class="btn sm" id="btnCollapse" type="button">Recolher tudo</button>
+      <button class="btn sm ghost" id="btnHelp" type="button">Como funciona?</button>
+    </div>
+    <div class="storage-note" id="storageNote"></div>
+  </section>
+
+  <section class="section">
+    <div class="section-head">
+      <span class="dot"></span>
+      <h3>Origens &amp; Ascendência</h3>
+      <span class="sub">bisavós e tios-avós</span>
+    </div>
+    <div class="tree" id="ascTree"></div>
+  </section>
+
+  <section class="section">
+    <div class="section-head">
+      <span class="dot"></span>
+      <h3>Descendência — os 8 ramos</h3>
+      <span class="sub" id="descSub"></span>
+    </div>
+    <div class="tree" id="mainTree"></div>
+  </section>
+
+  <div class="footer">
+    Árvore genealógica colaborativa da família Carvalho &amp; Batista.<br>
+    Desenvolvido por <a href="https://cjcconsultoria.com" target="_blank" rel="noopener">CJC Consultoria</a>.
+  </div>
+</div>
+
+<!-- Overlay reutilizável -->
+<div class="overlay" id="overlay" role="dialog" aria-modal="true" aria-labelledby="ovTitle">
+  <div class="sheet" id="sheet">
+    <div class="sheet-grip"></div>
+    <div class="sheet-in" id="sheetIn"></div>
+  </div>
+</div>
+
+<div class="toast-wrap" id="toastWrap" aria-live="polite"></div>
+
+<script>
+"use strict";
+/* ==========================================================================
+   CONFIGURAÇÃO
+   Troque o PIN abaixo pelo seu. É uma trava leve (fricção), não segurança forte:
+   qualquer pessoa com conhecimento técnico consegue contornar código no navegador.
+   Para controle real, use a camada de backend (ver seção "Persistência" abaixo).
+   ========================================================================== */
+const ADMIN_PIN = "carvalho2026";
+
+/* Chaves de armazenamento (compartilhado entre todos que abrem a página) */
+const KEY_DATA = "carvalho_tree_v1";
+const KEY_PENDING = "carvalho_pending_v1";
+
+/* ==========================================================================
+   DADOS SEMENTE — transcritos do documento original.
+   P(nome, filhos, subtitulo) constrói um nó.
+   ========================================================================== */
+function P(name, children, meta){ return { name:name, meta:meta||null, children:children||[], notes:[] }; }
+
+const SEED_TREE = P("Aires José de Carvalho & Rosa Batista", [
+  P("Mª Amélia Carvalho & Armindo", [
+    P("Mª Fernanda (Nina)", [
+      P("com Afonso", [ P("Bruno") ], "união"),
+      P("com Rogério", [
+        P("Marília & Benjamim", [
+          P("Cláudia & Ricardo", [ P("Iara (& Bruno)"), P("Ivo") ]),
+          P("Liliana & Nuno", [ P("João"), P("Paula") ]),
+        ]),
+        P("Manuel & Ana", [ P("Rogério & Claudia", [ P("Gonçalo") ]) ]),
+        P("Hermínia Isolette"),
+      ], "união"),
+    ]),
+  ], "Ramo 1"),
+
+  P("Francisco Carvalho & Lourdes", [
+    P("Carmo & Francisco", [
+      P("Ana Francisca & Tom", [ P("Diana") ]),
+      P("Francisco Aires"),
+      P("Manuel Francisco"),
+    ]),
+    P("Edna", [
+      P("com Armando", [
+        P("Sónia & Tony", [ P("Lourdinhas"), P("Kiko") ]),
+        P("Ana Paula & António Eugénio", [
+          P("Daniela & Nani", [ P("Lucas"), P("Catarina"), P("Beatriz") ]),
+          P("Paulo André & Melanie", [ P("Leonardo"), P("Adriana"), P("Sienna") ]),
+          P("Marcos"),
+        ]),
+        P("Margarida (Guida) & Zé", [
+          P("Zé & Maria", [ P("António"), P("Eva") ]),
+          P("Margarida"),
+          P("Sofia Margarida"),
+        ]),
+        P("Vanda & Marcos", [ P("Diogo"), P("Dennis") ]),
+      ], "união"),
+      P("com Ricardo", [ P("Rafaela", [ P("Filipe") ]) ], "união"),
+    ]),
+  ], "Ramo 2"),
+
+  P("Lucília Carvalho & Constantino", [
+    P("Nelson & Mariazinha", [
+      P("Solange & Tobi", [ P("Rafael"), P("Lucky"), P("Aliej") ]),
+      P("Tommy"), P("Stephanie"), P("Nicolas"),
+    ]),
+    P("Leno"),
+    P("Carlos Osvaldo & Manuela", [ P("Susana Raquel") ]),
+    P("César", [ P("Heliana") ]),
+  ], "Ramo 3"),
+
+  P("Alice Carvalho & Armindo", [
+    P("Fernando Hitler & Mª Teresa", [
+      P("Vera", [ P("Carlos Miguel"), P("Rodrigo"), P("Lucas") ]),
+      P("Fernando"), P("Aires"),
+    ]),
+    P("Elsa & Queirós", [
+      P("Miguel"),
+      P("Ivo & Ana Cristina", [ P("Thelma"), P("Tomas") ]),
+      P("Nuno & Luísa", [ P("Tiago") ]),
+      P("Hildeberto Jorge & Tânia"),
+    ]),
+    P("Sandra", [
+      P("com Ângelo", [
+        P("Ricardo César"), P("João Filipe"),
+        P("Ângela & Tomás", [ P("Guilherme") ]),
+      ], "união"),
+      P("com Otelo", [ P("Martim") ], "união"),
+    ]),
+  ], "Ramo 4"),
+
+  P("Mª Lourdes (Lurdes) Carvalho & Zé", [
+    P("Célia & João Lemos", [ P("Marina", [ P("Maria Vitória") ]) ]),
+    P("Fernando"),
+    P("Carla & Carlos", [ P("Beatriz", [ P("Daniel") ]), P("Pedro") ]),
+  ], "Ramo 5"),
+
+  P("Emília Carvalho & Mário", [
+    P("Carlos Jorge & Patrícia"),
+  ], "Ramo 6"),
+
+  P("Fernando Edgar José de Carvalho & Maria Ana", [
+    P("Ana Sofia Gonçalves de Carvalho & Rui", [ P("Inês"), P("Gonçalo") ]),
+    P("Rui Edgar & Davi"),
+  ], "Ramo 7"),
+
+  P("Isabel Celeste Carvalho & Joaquim", [
+    P("Vera Mónica & Adrian", [ P("Lara"), P("Liam") ]),
+    P("Ana Cristina & Gonçalo", [ P("Maria Rita") ]),
+  ], "Ramo 8"),
+], "Genearcas · tronco da família");
+
+const SEED_ASC = [
+  P("Linhagem Patrilinear — Pais de Aires", [], "Vila Nova de Famalicão, Portugal · nomes desconhecidos"),
+  P("Linhagem Matrilinear — Pais de Rosa", [
+    P("Pai de Rosa", [], "Transmontano, Portugal · nome desconhecido"),
+    P("Mãe de Rosa", [], "Angolana · nome desconhecido"),
+  ], "avós maternos"),
+  P("Tios-Avós Paternos (irmãos de Aires)", [
+    P("Amélia de Carvalho"),
+    P("Irmão varão (nome desconhecido)"),
+  ]),
+];
+
+/* ==========================================================================
+   ESTADO + MAPAS
+   ========================================================================== */
+const state = { data:null, pending:[], expanded:new Set(), query:"", matches:new Set(), isAdmin:false };
+let nodeById = {}, parentId = {};
+
+function rebuildMaps(){
+  nodeById = {}; parentId = {};
+  const walk = (n,pid)=>{ nodeById[n.id]=n; if(pid) parentId[n.id]=pid; (n.children||[]).forEach(c=>walk(c,n.id)); };
+  walk(state.data.tree, null);
+  state.data.asc.forEach(n=>walk(n,null));
+}
+function assignIds(){
+  const walk=(n,id)=>{ n.id=id; if(!n.notes)n.notes=[]; (n.children||[]).forEach((c,i)=>walk(c, id+"."+i)); };
+  walk(state.data.tree,"t");
+  state.data.asc.forEach((n,i)=>walk(n,"a"+i));
+}
+function depthOf(id){ return (id.match(/\./g)||[]).length; }
+
+/* ==========================================================================
+   ARMAZENAMENTO — usa window.storage (compartilhado). Fallback em memória
+   se a API não existir (ex.: arquivo aberto fora do ambiente que a injeta).
+   ========================================================================== */
+const hasWS = (typeof window !== "undefined") && window.storage && typeof window.storage.get === "function";
+const mem = {};
+async function sget(key){
+  if(hasWS){ try{ const r = await window.storage.get(key, true); return r ? JSON.parse(r.value) : null; }catch(e){ return null; } }
+  return (key in mem) ? JSON.parse(mem[key]) : null;
+}
+async function sset(key, val){
+  const s = JSON.stringify(val);
+  if(hasWS){ try{ await window.storage.set(key, s, true); return true; }catch(e){ return false; } }
+  mem[key] = s; return true;
+}
+
+/* ==========================================================================
+   UTILIDADES
+   ========================================================================== */
+function esc(s){ return String(s==null?"":s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c])); }
+function norm(s){ return String(s||"").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,""); }
+function clone(o){ return JSON.parse(JSON.stringify(o)); }
+function uid(){ return Date.now().toString(36)+Math.random().toString(36).slice(2,7); }
+function fmtDate(ts){ try{ return new Date(ts).toLocaleDateString("pt-BR",{day:"2-digit",month:"short",year:"numeric",hour:"2-digit",minute:"2-digit"}); }catch(e){ return ""; } }
+
+function firstLetter(s){ const m = String(s).match(/[A-Za-zÀ-ÿ]/); return m ? m[0] : "?"; }
+function initials(name){
+  const clean = String(name).replace(/\(.*?\)/g,"").trim();
+  const sides = clean.split("&").map(s=>s.trim()).filter(Boolean);
+  if(sides.length>=2) return (firstLetter(sides[0])+firstLetter(sides[1])).toUpperCase();
+  const w = clean.split(/\s+/).filter(Boolean);
+  if(w.length>=2) return (firstLetter(w[0])+firstLetter(w[w.length-1])).toUpperCase();
+  return clean.slice(0,2).toUpperCase();
+}
+const AV_COLORS = ["#3f6b4e","#7a5b3a","#4a6b7a","#8a5a4a","#5d5a7a","#6b7a4a","#7a4a63","#4a7a6b"];
+function avatarColor(name){ let h=0; for(let i=0;i<name.length;i++) h=(h*31+name.charCodeAt(i))>>>0; return AV_COLORS[h%AV_COLORS.length]; }
+
+function countPeople(n){ let c = (n.meta==="união")?0:1; (n.children||[]).forEach(k=>c+=countPeople(k)); return c; }
+
+/* ==========================================================================
+   BUSCA — calcula nós que casam e seus ancestrais (para mostrar o caminho)
+   ========================================================================== */
+function computeMatches(){
+  state.matches = new Set();
+  const q = norm(state.query.trim());
+  if(!q) return;
+  const hit = new Set();
+  Object.values(nodeById).forEach(n=>{
+    const inName = norm(n.name).includes(q);
+    const inNote = (n.notes||[]).some(nt=>norm(nt.text).includes(q));
+    if(inName||inNote) hit.add(n.id);
+  });
+  // adiciona ancestrais para revelar o caminho
+  hit.forEach(id=>{
+    state.matches.add(id);
+    let p = parentId[id];
+    while(p){ state.matches.add(p); p = parentId[p]; }
+  });
+  // durante busca, abre os ancestrais
+  state.matches.forEach(id=>{ if((nodeById[id].children||[]).length) state.expanded.add(id); });
+}
+function highlight(name){
+  const q = norm(state.query.trim());
+  if(!q) return esc(name);
+  const nn = norm(name), out=[]; let i=0;
+  while(i<name.length){
+    const idx = nn.indexOf(q, i);
+    if(idx<0){ out.push(esc(name.slice(i))); break; }
+    out.push(esc(name.slice(i,idx)));
+    out.push("<mark>"+esc(name.slice(idx, idx+q.length))+"</mark>");
+    i = idx+q.length;
+  }
+  return out.join("");
+}
+
+/* ==========================================================================
+   RENDER
+   ========================================================================== */
+function nodeHTML(n, isRootLevel){
+  const searching = !!state.query.trim();
+  if(searching && !state.matches.has(n.id)) return "";
+  const kids = n.children||[];
+  const hasKids = kids.length>0;
+  const open = state.expanded.has(n.id);
+  const kindClass = n.id==="t" ? "kind-root" : (n.meta && /^Ramo/.test(n.meta) ? "kind-ramo" : (n.meta==="união"?"kind-uniao":""));
+  const noteN = (n.notes||[]).length;
+
+  let childHTML = "";
+  if(hasKids && open){
+    const inner = kids.map(c=>nodeHTML(c,false)).join("");
+    if(inner) childHTML = '<ul class="branch'+(isRootLevel?"":"")+'">'+inner+'</ul>';
+  }
+  const match = searching && (norm(n.name).includes(norm(state.query))|| (n.notes||[]).some(nt=>norm(nt.text).includes(norm(state.query))));
+
+  const twist = hasKids
+    ? '<button class="twist'+(open?" open":"")+'" data-act="toggle" data-id="'+n.id+'" aria-label="'+(open?"Recolher":"Expandir")+'" aria-expanded="'+open+'"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m9 6 6 6-6 6"/></svg></button>'
+    : '<span class="twist leaf"></span>';
+
+  const av = n.meta==="união"
+    ? '<span class="avatar" aria-hidden="true"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.6l-1-1a5.5 5.5 0 0 0-7.8 7.8l1 1L12 21l7.8-7.6 1-1a5.5 5.5 0 0 0 0-7.8z"/></svg></span>'
+    : '<span class="avatar" aria-hidden="true" style="background:'+avatarColor(n.name)+'">'+esc(initials(n.name))+'</span>';
+
+  const noteBadge = noteN ? '<span class="badge-note" title="'+noteN+' observação(ões)"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>'+noteN+'</span>' : "";
+
+  const meta = n.meta && n.meta!=="união" ? '<span class="mt">'+esc(n.meta)+'</span>' : (n.meta==="união"?'':'');
+
+  return ''
+    + '<li class="node '+kindClass+(n.id==="t"?" root-li":"")+(match?" ":"")+'">'
+    +   '<div class="row'+(match?" match":"")+'">'
+    +     twist + av
+    +     '<button class="person" data-act="open" data-id="'+n.id+'">'
+    +        '<span class="nm">'+highlight(n.name)+'</span>'+meta
+    +     '</button>'
+    +     noteBadge
+    +   '</div>'
+    +   childHTML
+    + '</li>';
+}
+
+function render(){
+  computeMatches();
+  const searching = !!state.query.trim();
+
+  // árvore principal
+  const mainInner = nodeHTML(state.data.tree, true);
+  document.getElementById("mainTree").innerHTML =
+    '<ul class="branch root">'+ (mainInner || '<li class="empty" style="padding:14px">Nenhum resultado na descendência.</li>') +'</ul>';
+
+  // ascendência
+  const ascInner = state.data.asc.map(n=>nodeHTML(n,true)).join("");
+  document.getElementById("ascTree").innerHTML =
+    '<ul class="branch root">'+ (ascInner || '<li class="empty" style="padding:14px">Nenhum resultado na ascendência.</li>') +'</ul>';
+
+  // stats
+  const people = countPeople(state.data.tree) - 1; // exclui os genearcas do total de descendentes
+  document.getElementById("stats").innerHTML =
+      stat(people, "descendentes") + stat(8, "ramos") + stat(6, "gerações") + (state.isAdmin?stat(state.pending.length,"em análise"):"");
+  document.getElementById("descSub").textContent = "clique para expandir";
+
+  updatePendingUI();
+}
+function stat(v,l){ return '<div class="stat"><b>'+v+'</b><span>'+esc(l)+'</span></div>'; }
+
+function updatePendingUI(){
+  const n = state.pending.length;
+  document.getElementById("pendingCount").textContent = n;
+  document.getElementById("pendingChip").style.display = (n>0 || state.isAdmin) ? "inline-flex" : "none";
+}
+
+/* ==========================================================================
+   OVERLAY (sheet / modais)
+   ========================================================================== */
+const overlay = document.getElementById("overlay");
+const sheetIn = document.getElementById("sheetIn");
+function openSheet(html){
+  sheetIn.innerHTML = html;
+  overlay.classList.add("show");
+  const f = sheetIn.querySelector("input,textarea,button");
+  if(f) setTimeout(()=>f.focus(),60);
+}
+function closeSheet(){ overlay.classList.remove("show"); }
+overlay.addEventListener("click", e=>{ if(e.target===overlay) closeSheet(); });
+document.addEventListener("keydown", e=>{ if(e.key==="Escape") closeSheet(); });
+
+/* ----- ficha da pessoa ----- */
+function pathOf(id){
+  const parts=[]; let cur=id;
+  while(cur){ if(nodeById[cur] && cur!==id) parts.unshift(nodeById[cur].name); cur=parentId[cur]; }
+  return parts.length ? parts.join("  ›  ") : "Raiz da árvore";
+}
+function personSheet(id){
+  const n = nodeById[id]; if(!n) return;
+  const notes = n.notes||[];
+  const notesHTML = notes.length
+    ? '<div class="notes-list">'+notes.map(nt=>'<div class="note-item"><p>'+esc(nt.text)+'</p><span class="meta">— '+esc(nt.author||"anónimo")+' · '+fmtDate(nt.at)+'</span></div>').join("")+'</div>'
+    : '<p class="empty">Nenhuma observação registada ainda.</p>';
+
+  const adminEdit = ''
+    + '<div class="divider admin-only block"></div>'
+    + '<div class="admin-only block">'
+    +   '<div class="field"><label>Editar nome (aplica na hora — oficial)</label>'
+    +     '<input id="adminName" value="'+esc(n.name)+'"></div>'
+    +   '<div class="actions"><button class="btn ok" data-act="admin-save-name" data-id="'+id+'">Salvar nome</button></div>'
+    +   '<div class="field" style="margin-top:14px"><label>Adicionar nota oficial</label>'
+    +     '<textarea id="adminNote" rows="2" placeholder="Observação que entra direto na árvore…"></textarea></div>'
+    +   '<div class="actions"><button class="btn" data-act="admin-add-note" data-id="'+id+'">Publicar nota</button></div>'
+    + '</div>';
+
+  openSheet(''
+    + '<div class="path">'+esc(pathOf(id))+'</div>'
+    + '<h3 id="ovTitle">'+esc(n.name)+'</h3>'
+    + (n.meta && n.meta!=="união" ? '<div class="path" style="margin-top:-8px">'+esc(n.meta)+'</div>':'')
+    + '<h4 style="margin:18px 0 2px;font-size:.82rem;color:var(--muted);text-transform:uppercase;letter-spacing:.5px">Observações</h4>'
+    + notesHTML
+    + '<div class="divider"></div>'
+    + '<div class="actions">'
+    +   '<button class="btn primary" data-act="suggest-name" data-id="'+id+'">Sugerir novo nome</button>'
+    +   '<button class="btn" data-act="suggest-note" data-id="'+id+'">Adicionar observação</button>'
+    + '</div>'
+    + adminEdit
+  );
+}
+
+/* ----- formulário: sugerir nome ----- */
+function suggestNameForm(id){
+  const n = nodeById[id];
+  openSheet(''
+    + '<h3 id="ovTitle">Sugerir correção de nome</h3>'
+    + '<div class="path">'+esc(n.name)+'</div>'
+    + '<div class="field"><label>Nome correto</label><input id="sgName" value="'+esc(n.name)+'"></div>'
+    + '<div class="field"><label>Seu nome (opcional)</label><input id="sgAuthor" placeholder="Quem está sugerindo?"></div>'
+    + '<div class="hint"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 8h.01M11 12h1v4h1"/></svg><span>Sua sugestão fica visível para o administrador (e demais visitantes) até ser revisada. Nada muda na árvore antes da aprovação.</span></div>'
+    + '<div class="actions"><button class="btn" data-act="close">Cancelar</button><button class="btn primary" data-act="submit-name" data-id="'+id+'">Enviar sugestão</button></div>'
+  );
+}
+/* ----- formulário: observação ----- */
+function suggestNoteForm(id){
+  const n = nodeById[id];
+  openSheet(''
+    + '<h3 id="ovTitle">Adicionar observação</h3>'
+    + '<div class="path">Sobre: '+esc(n.name)+'</div>'
+    + '<div class="field"><label>Observação</label><textarea id="sgText" rows="3" placeholder="Datas, correções, histórias, links de fotos…"></textarea></div>'
+    + '<div class="field"><label>Seu nome (opcional)</label><input id="sgAuthor" placeholder="Quem está observando?"></div>'
+    + '<div class="hint"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 8h.01M11 12h1v4h1"/></svg><span>Enviada para aprovação. Fica visível para o administrador até ser revisada.</span></div>'
+    + '<div class="actions"><button class="btn" data-act="close">Cancelar</button><button class="btn primary" data-act="submit-note" data-id="'+id+'">Enviar</button></div>'
+  );
+}
+
+/* ==========================================================================
+   SUBMISSÃO DE SUGESTÕES
+   ========================================================================== */
+async function submitSuggestion(item){
+  const cur = (await sget(KEY_PENDING)) || [];  // relê para não sobrescrever concorrentes
+  cur.push(item);
+  await sset(KEY_PENDING, cur);
+  state.pending = cur;
+  updatePendingUI(); render();
+}
+async function submitName(id){
+  const val = (document.getElementById("sgName").value||"").trim();
+  const author = (document.getElementById("sgAuthor").value||"").trim();
+  const n = nodeById[id];
+  if(!val){ toast("Escreva o nome.","err"); return; }
+  if(val===n.name){ toast("O nome é igual ao atual.","err"); return; }
+  await submitSuggestion({ id:uid(), type:"rename", nodeId:id, nodeName:n.name, proposed:val, author:author, at:Date.now(), status:"pending" });
+  closeSheet(); toast("Sugestão enviada para aprovação.","ok");
+}
+async function submitNote(id){
+  const text = (document.getElementById("sgText").value||"").trim();
+  const author = (document.getElementById("sgAuthor").value||"").trim();
+  if(!text){ toast("Escreva a observação.","err"); return; }
+  await submitSuggestion({ id:uid(), type:"note", nodeId:id, nodeName:nodeById[id].name, text:text, author:author, at:Date.now(), status:"pending" });
+  closeSheet(); toast("Observação enviada para aprovação.","ok");
+}
+
+/* ==========================================================================
+   ADMIN — login, fila de revisão, edições diretas
+   ========================================================================== */
+function adminLogin(){
+  if(state.isAdmin){
+    openSheet(''
+      + '<h3 id="ovTitle">Administrador</h3>'
+      + '<p class="empty">Você está no modo administrador. Pode editar nomes na hora, publicar notas oficiais e revisar sugestões.</p>'
+      + '<div class="divider"></div>'
+      + '<div class="actions">'
+      +   '<button class="btn ok" data-act="open-queue">Revisar sugestões ('+state.pending.length+')</button>'
+      +   '<button class="btn danger" data-act="reseed">Restaurar árvore original</button>'
+      + '</div>'
+      + '<div class="actions"><button class="btn ghost" data-act="admin-logout">Sair do modo admin</button></div>'
+    );
+    return;
+  }
+  openSheet(''
+    + '<h3 id="ovTitle">Entrar como administrador</h3>'
+    + '<p class="empty">Apenas o administrador aprova as sugestões e edita a árvore.</p>'
+    + '<div class="field"><label>PIN de acesso</label><input id="pin" type="password" inputmode="numeric" placeholder="••••••"></div>'
+    + '<div class="actions"><button class="btn" data-act="close">Cancelar</button><button class="btn primary" data-act="do-login">Entrar</button></div>'
+  );
+}
+function doLogin(){
+  const pin = (document.getElementById("pin").value||"").trim();
+  if(pin===ADMIN_PIN){
+    state.isAdmin = true; document.body.classList.add("is-admin");
+    closeSheet(); toast("Modo administrador ativo.","ok"); render();
+  } else { toast("PIN incorreto.","err"); }
+}
+function adminLogout(){ state.isAdmin=false; document.body.classList.remove("is-admin"); closeSheet(); toast("Você saiu do modo admin."); render(); }
+
+async function openQueue(){
+  state.pending = (await sget(KEY_PENDING)) || [];
+  const items = state.pending.slice().sort((a,b)=>b.at-a.at);
+  const list = items.length ? items.map(queueItemHTML).join("") : '<p class="empty">Nenhuma sugestão pendente. Tudo em dia.</p>';
+  openSheet('<h3 id="ovTitle">Sugestões pendentes ('+items.length+')</h3>'+list);
+}
+function queueItemHTML(it){
+  const who = (it.author?esc(it.author):"anónimo")+' · '+fmtDate(it.at);
+  if(it.type==="rename"){
+    const exists = !!nodeById[it.nodeId];
+    return '<div class="q-item">'
+      + '<div class="q-top"><span class="tag rename">Correção de nome</span><span class="who">'+who+'</span></div>'
+      + '<div class="target">Em: '+esc(it.nodeName)+'</div>'
+      + '<div class="q-change"><span class="from">'+esc(it.nodeName)+'</span> &nbsp;→&nbsp; <span class="to">'+esc(it.proposed)+'</span></div>'
+      + (exists?'':'<p class="empty">Esta pessoa não existe mais na árvore.</p>')
+      + '<div class="q-actions">'
+      +   (exists?'<button class="btn ok sm" data-act="approve" data-id="'+it.id+'">Aprovar</button>':'')
+      +   '<button class="btn danger sm" data-act="reject" data-id="'+it.id+'">Rejeitar</button>'
+      + '</div></div>';
+  }
+  return '<div class="q-item">'
+    + '<div class="q-top"><span class="tag note">Observação</span><span class="who">'+who+'</span></div>'
+    + '<div class="target">Sobre: '+esc(it.nodeName)+'</div>'
+    + '<div class="q-change">'+esc(it.text)+'</div>'
+    + '<div class="q-actions">'
+    +   (nodeById[it.nodeId]?'<button class="btn ok sm" data-act="approve" data-id="'+it.id+'">Aprovar</button>':'')
+    +   '<button class="btn danger sm" data-act="reject" data-id="'+it.id+'">Rejeitar</button>'
+    + '</div></div>';
+}
+async function resolveSuggestion(sid, approve){
+  // relê estado atual
+  const data = (await sget(KEY_DATA)) || state.data;
+  state.data = data; rebuildMaps();
+  let pending = (await sget(KEY_PENDING)) || [];
+  const it = pending.find(x=>x.id===sid);
+  if(!it){ toast("Sugestão não encontrada.","err"); openQueue(); return; }
+
+  if(approve){
+    const node = nodeById[it.nodeId];
+    if(!node){ toast("Alvo não existe mais; rejeite a sugestão.","err"); return; }
+    if(it.type==="rename"){ node.name = it.proposed; }
+    else { (node.notes = node.notes||[]).push({ text:it.text, author:it.author||"", at:Date.now() }); }
+    await sset(KEY_DATA, state.data);
+  }
+  pending = pending.filter(x=>x.id!==sid);
+  await sset(KEY_PENDING, pending);
+  state.pending = pending;
+  toast(approve?"Aprovado e aplicado.":"Sugestão rejeitada.", approve?"ok":"");
+  render(); openQueue();
+}
+
+async function adminSaveName(id){
+  const val=(document.getElementById("adminName").value||"").trim();
+  if(!val){ toast("Nome vazio.","err"); return; }
+  const data=(await sget(KEY_DATA))||state.data; state.data=data; rebuildMaps();
+  if(!nodeById[id]){ toast("Nó não encontrado.","err"); return; }
+  nodeById[id].name=val; await sset(KEY_DATA,state.data);
+  toast("Nome atualizado.","ok"); render(); personSheet(id);
+}
+async function adminAddNote(id){
+  const val=(document.getElementById("adminNote").value||"").trim();
+  if(!val){ toast("Observação vazia.","err"); return; }
+  const data=(await sget(KEY_DATA))||state.data; state.data=data; rebuildMaps();
+  if(!nodeById[id]){ toast("Nó não encontrado.","err"); return; }
+  (nodeById[id].notes=nodeById[id].notes||[]).push({text:val,author:"Administração",at:Date.now()});
+  await sset(KEY_DATA,state.data);
+  toast("Nota publicada.","ok"); render(); personSheet(id);
+}
+async function reseed(){
+  openSheet(''
+    + '<h3 id="ovTitle">Restaurar árvore original?</h3>'
+    + '<p class="empty">Isto substitui todos os nomes e observações pela versão original transcrita do documento. As sugestões pendentes são mantidas. Não dá para desfazer.</p>'
+    + '<div class="actions"><button class="btn" data-act="close">Cancelar</button><button class="btn danger" data-act="do-reseed">Restaurar</button></div>'
+  );
+}
+async function doReseed(){
+  state.data = { tree: clone(SEED_TREE), asc: clone(SEED_ASC) };
+  assignIds(); rebuildMaps();
+  await sset(KEY_DATA, state.data);
+  setDefaultExpanded();
+  closeSheet(); toast("Árvore restaurada.","ok"); render();
+}
+
+/* ==========================================================================
+   AJUDA
+   ========================================================================== */
+function helpSheet(){
+  openSheet(''
+    + '<h3 id="ovTitle">Como funciona</h3>'
+    + '<div class="note-item"><p><strong>1. Explore.</strong> Toque nas setas para abrir cada ramo e nos nomes para ver detalhes.</p></div>'
+    + '<div class="note-item"><p><strong>2. Contribua.</strong> Encontrou um nome errado ou tem uma história? Use “Sugerir novo nome” ou “Adicionar observação”. Sua contribuição vai para uma fila.</p></div>'
+    + '<div class="note-item"><p><strong>3. Aprovação.</strong> O administrador da família revisa cada sugestão e decide o que entra na árvore. Só depois disso a mudança aparece para todos.</p></div>'
+    + '<div class="actions"><button class="btn primary" data-act="close">Entendi</button></div>'
+  );
+}
+
+/* ==========================================================================
+   EXPAND / COLLAPSE
+   ========================================================================== */
+function setDefaultExpanded(){
+  state.expanded = new Set();
+  // tronco e os 8 ramos abertos; resto recolhido
+  Object.keys(nodeById).forEach(id=>{ if(id[0]==="t" && depthOf(id)<=1) state.expanded.add(id); });
+  state.data.asc.forEach(n=>state.expanded.add(n.id)); // ascendência aberta (é pequena)
+}
+function expandAll(){ Object.keys(nodeById).forEach(id=>{ if((nodeById[id].children||[]).length) state.expanded.add(id); }); render(); }
+function collapseAll(){ state.expanded = new Set(); render(); }
+
+/* ==========================================================================
+   TOASTS
+   ========================================================================== */
+function toast(msg, kind){
+  const el = document.createElement("div");
+  el.className = "toast"+(kind?(" "+kind):"");
+  el.textContent = msg;
+  document.getElementById("toastWrap").appendChild(el);
+  requestAnimationFrame(()=>el.classList.add("show"));
+  setTimeout(()=>{ el.classList.remove("show"); setTimeout(()=>el.remove(),300); }, 2600);
+}
+
+/* ==========================================================================
+   EVENTOS (delegação)
+   ========================================================================== */
+document.addEventListener("click", e=>{
+  const t = e.target.closest("[data-act]");
+  if(!t) return;
+  const act = t.getAttribute("data-act");
+  const id = t.getAttribute("data-id");
+  switch(act){
+    case "toggle": if(state.expanded.has(id)) state.expanded.delete(id); else state.expanded.add(id); render(); break;
+    case "open": personSheet(id); break;
+    case "suggest-name": suggestNameForm(id); break;
+    case "suggest-note": suggestNoteForm(id); break;
+    case "submit-name": submitName(id); break;
+    case "submit-note": submitNote(id); break;
+    case "close": closeSheet(); break;
+    case "do-login": doLogin(); break;
+    case "open-queue": openQueue(); break;
+    case "approve": resolveSuggestion(id,true); break;
+    case "reject": resolveSuggestion(id,false); break;
+    case "admin-save-name": adminSaveName(id); break;
+    case "admin-add-note": adminAddNote(id); break;
+    case "admin-logout": adminLogout(); break;
+    case "reseed": reseed(); break;
+    case "do-reseed": doReseed(); break;
+  }
+});
+document.getElementById("btnAdmin").addEventListener("click", adminLogin);
+document.getElementById("btnQueue").addEventListener("click", openQueue);
+document.getElementById("pendingChip").addEventListener("click", ()=> state.isAdmin ? openQueue() : adminLogin());
+document.getElementById("btnExpand").addEventListener("click", expandAll);
+document.getElementById("btnCollapse").addEventListener("click", collapseAll);
+document.getElementById("btnHelp").addEventListener("click", helpSheet);
+let searchT;
+document.getElementById("search").addEventListener("input", e=>{
+  clearTimeout(searchT);
+  searchT = setTimeout(()=>{ state.query = e.target.value; if(!state.query.trim()) setDefaultExpanded(); render(); }, 120);
+});
+
+/* ==========================================================================
+   INICIALIZAÇÃO
+   ========================================================================== */
+async function init(){
+  let data = await sget(KEY_DATA);
+  if(!data || !data.tree){
+    state.data = { tree: clone(SEED_TREE), asc: clone(SEED_ASC) };
+    assignIds();
+    await sset(KEY_DATA, state.data);
+  } else {
+    state.data = data;
+  }
+  rebuildMaps();
+  state.pending = (await sget(KEY_PENDING)) || [];
+  setDefaultExpanded();
+  render();
+
+  if(!hasWS){
+    const el = document.getElementById("storageNote");
+    el.innerHTML = "⚠️ Modo local: este ambiente não tem armazenamento compartilhado, então as sugestões não são salvas entre dispositivos. Para uso real entre a família, hospede com um backend (ver instruções na entrega).";
+    el.classList.add("show");
+  }
+}
+init();
+</script>
 </body>
 </html>
