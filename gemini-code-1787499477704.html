@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Árvore Genealógica - Família Carvalho e Batista</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            margin: 40px auto;
+            max-width: 900px;
+            color: #333;
+            background-color: #f9f9f9;
+        }
+        h1 {
+            color: #2c3e50;
+            text-align: center;
+            border-bottom: 2px solid #2c3e50;
+            padding-bottom: 10px;
+        }
+        h2 {
+            color: #34495e;
+            margin-top: 30px;
+        }
+        .tree-container {
+            background: #fff;
+            padding: 20px 40px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        ul {
+            list-style-type: none;
+            border-left: 2px solid #bdc3c7;
+            padding-left: 20px;
+            margin-left: 10px;
+        }
+        li {
+            margin: 8px 0;
+            position: relative;
+        }
+        li::before {
+            content: "";
+            position: absolute;
+            top: 12px;
+            left: -20px;
+            width: 15px;
+            border-bottom: 2px solid #bdc3c7;
+        }
+        .genearca {
+            font-weight: bold;
+            color: #c0392b;
+            font-size: 1.1em;
+        }
+        .ramo {
+            font-weight: bold;
+            color: #2980b9;
+            margin-top: 15px;
+        }
+        .nome {
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body>
+    <div class="tree-container">
+        <h1>Árvore Genealógica: Família Carvalho e Batista</h1>
+
+        <h2>1. Ascendência e Origens (Bisavós e Tios-Avós)</h2>
+        <ul>
+            <li><span class="nome">Linhagem Patrilinear (Pais de Aires):</span> Nomes desconhecidos (Vila Nova de Famalicão, Portugal)</li>
+            <li><span class="nome">Linhagem Matrilinear (Pais de Rosa):</span>
+                <ul>
+                    <li>Pai: Nome desconhecido (Transmontano, Portugal)</li>
+                    <li>Mãe: Nome desconhecido (Angolana)</li>
+                </ul>
+            </li>
+            <li><span class="nome">Tios-Avós Paternos (Irmãos de Aires):</span> Amélia de Carvalho e pelo menos um irmão varão</li>
+        </ul>
+
+        <h2>2. Genearcas Centrais (Avós)</h2>
+        <ul>
+            <li class="genearca">Aires José de Carvalho & Rosa Batista</li>
+        </ul>
+
+        <h2>3. Descendência (Os 8 Ramos)</h2>
+        <ul>
+            <!-- Ramo 1 -->
+            <li class="ramo">Ramo 1: Mª Amélia Carvalho & Armindo
+                <ul>
+                    <li><span class="nome">Mª Fernanda</span>
+                        <ul>
+                            <li><em>com Afonso:</em> Bruno</li>
+                            <li><em>com Rogério:</em>
+                                <ul>
+                                    <li><span class="nome">Marília & Benjamim</span>
+                                        <ul>
+                                            <li>Cláudia & Ricardo ➔ Iara (& Bruno), Ivo</li>
+                                            <li>Liliana & Nuno ➔ João, Paula</li>
+                                        </ul>
+                                    </li>
+                                    <li><span class="nome">Manuel & Ana</span>
+                                        <ul>
+                                            <li>Rogério & Claudia ➔ Gonçalo</li>
+                                        </ul>
+                                    </li>
+                                    <li><span class="nome">Hermínia Isolette</span></li>
+                                </ul>
+                            </li>
+                        </ul>
+                    </li>
+                </ul>
+            </li>
+
+            <!-- Ramo 2 -->
+            <li class="ramo">Ramo 2: Francisco Carvalho & Lourdes
+                <ul>
+                    <li><span class="nome">Carmo & Francisco</span>
+                        <ul>
+                            <li>Ana Francisca ➔ Diana</li>
+                            <li>Manuel Francisco</li>
+                            <li>Francisco Aires</li>
+                        </ul>
+                    </li>
+                    <li><span class="nome">Edna</span>
+                        <ul>
+                            <li><em>com Armando:</em>
+                                <ul>
+                                    <li>Sónia & Tony ➔ Lourdinhas, Kiko</li>
+                                    <li>Ana Paula & António Eugénio ➔
+                                        <ul>
+                                            <li>Daniela & Nani ➔ Lucas, Catarina, Beatriz</li>
+                                            <li>Paulo André & Melanie ➔ Leonardo, Adriana, Sienna</li>
+                                            <li>Marcos</li>
+                                        </ul>
+                                    </li>
+                                    <li>Margarida & Zé ➔
+                                        <ul>
+                                            <li>Zé ➔ Eva</li>
+                                            <li>Margarida</li>
+                                            <li>Sofia Margarida</li>
+                                        </ul>
+                                    </li>
+                                    <li>Vanda ➔ Diogo, Dennis</li>
+                                </ul>
+                            </li>
+                            <li><em>com Ricardo:</em>
+                                <ul>
+                                    <li>Rafaela ➔ Filipe</li>
+                                </ul>
+                            </li>
+                        </ul>
+                    </li>
+                </ul>
+            </li>
+
+            <!-- Ramo 3 -->
+            <li class="ramo">Ramo 3: Lucília Carvalho & Constantino
+                <ul>
+                    <li><span class="nome">Nelson & Zinha</span>
+                        <ul>
+                            <li>Solange & Tobi ➔ Rafael, Lucky, Aliej</li>
+                            <li>Romy ➔ Mila, Sophie</li>
+                            <li>Stephanie</li>
+                        </ul>
+                    </li>
+                    <li><span class="nome">Leno</span></li>
+                    <li><span class="nome">Carlos Osvaldo & Manuela</span> ➔ Susana Raquel</li>
+                    <li><span class="nome">César</span> ➔ Heliana</li>
+                </ul>
+            </li>
+
+            <!-- Ramo 4 -->
+            <li class="ramo">Ramo 4: Alice Carvalho & Armindo
+                <ul>
+                    <li><span class="nome">Fernando Hitler & Mª Teresa</span>
+                        <ul>
+                            <li>Vera ➔ Carlos Miguel, Rodrigo, Lucas</li>
+                            <li>Fernando</li>
+                            <li>Aires</li>
+                        </ul>
+                    </li>
+                    <li><span class="nome">Elsa & Queirós</span>
+                        <ul>
+                            <li>Miguel</li>
+                            <li>Ivo & Ana Cristina ➔ Thelma, Tomas</li>
+                            <li>Nuno & Luísa ➔ Tiago</li>
+                            <li>Hildeberto Jorge & Tânia</li>
+                        </ul>
+                    </li>
+                    <li><span class="nome">Sandra</span>
+                        <ul>
+                            <li><em>com Ângelo:</em> Ricardo César, João Filipe, Ângela (& Torrete ➔ Guilherme)</li>
+                            <li><em>com Otelo:</em> Martim</li>
+                        </ul>
+                    </li>
+                </ul>
+            </li>
+
+            <!-- Ramo 5 -->
+            <li class="ramo">Ramo 5: Mª Lourdes (Lurdes) Carvalho & Zé
+                <ul>
+                    <li><span class="nome">Célia & João Lemos</span> ➔ Marina ➔ Maria Vitória</li>
+                    <li><span class="nome">Fernando & Clara</span></li>
+                    <li><span class="nome">Carla & Carlos</span> ➔ Beatriz ➔ Daniel</li>
+                </ul>
+            </li>
+
+            <!-- Ramo 6 -->
+            <li class="ramo">Ramo 6: Emília Carvalho & Mário
+                <ul>
+                    <li><span class="nome">Carlos Jorge & Patrícia</span></li>
+                </ul>
+            </li>
+
+            <!-- Ramo 7 -->
+            <li class="ramo">Ramo 7: Fernando Edgar José de Carvalho & Maria Ana
+                <ul>
+                    <li><span class="nome">Ana Sofia Gonçalves de Carvalho & Rui</span> ➔ Inês, Gonçalo</li>
+                    <li><span class="nome">Rui Edgar & Davi</span></li>
+                </ul>
+            </li>
+
+            <!-- Ramo 8 -->
+            <li class="ramo">Ramo 8: Isabel Celeste Carvalho & Joaquim
+                <ul>
+                    <li><span class="nome">Vera Mónica & Adrian</span> ➔ Lara, Liam</li>
+                    <li><span class="nome">Ana Cristina</span> ➔ Rita</li>
+                </ul>
+            </li>
+        </ul>
+    </div>
+</body>
+</html>
