@@ -133,6 +133,9 @@ body{font-family:'Plus Jakarta Sans',sans-serif;color:var(--text);background:var
 .login input{width:100%;padding:12px;border:1px solid var(--border);border-radius:var(--r);font:inherit;font-size:15px;margin-bottom:12px;text-align:center;letter-spacing:2px}
 .login .btn{width:100%}
 
+.action-bar{position:sticky;top:60px;z-index:30;background:var(--bg);border-bottom:1px solid var(--border);padding:10px 16px;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.action-bar .unsaved{background:var(--warm);color:#fff;font-size:11px;font-weight:700;padding:3px 10px;border-radius:99px;animation:pulse 1.5s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.6}}
 .toolbar{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px}
 </style>
 </head>
@@ -150,7 +153,7 @@ var sb=window.supabase.createClient(SUPABASE_URL,SUPABASE_ANON_KEY);
 function P(n,c,m){return{name:n,meta:m||null,notes:[],children:c||[]}}
 var SEED={tree:P("Aires José de Carvalho & Rosa Batista",[P("Mª Amélia Carvalho & Armindo",[P("Mª Fernanda (Nina)",[P("com Afonso",[P("Bruno")],"união"),P("com Rogério",[P("Marília & Benjamim",[P("Cláudia & Ricardo",[P("Iara (& Bruno)"),P("Ivo")]),P("Liliana & Nuno",[P("João"),P("Paula")])]),P("Manuel & Ana",[P("Rogério & Claudia",[P("Gonçalo")])]),P("Hermínia Isolette")],"união")])],"Ramo 1"),P("Francisco Carvalho & Lourdes",[P("Carmo & Francisco",[P("Ana Francisca & Tom",[P("Diana")]),P("Francisco Aires"),P("Manuel Francisco")]),P("Edna",[P("com Armando",[P("Sónia & Tony",[P("Lourdinhas"),P("Kiko")]),P("Ana Paula & António Eugénio",[P("Daniela & Nani",[P("Lucas"),P("Catarina"),P("Beatriz")]),P("Paulo André & Melanie",[P("Leonardo"),P("Adriana"),P("Sienna")]),P("Marcos")]),P("Margarida (Guida) & Zé",[P("Zé & Maria",[P("António"),P("Eva")]),P("Margarida"),P("Sofia Margarida")]),P("Vanda & Marcos",[P("Diogo"),P("Dennis")])],"união"),P("com Ricardo",[P("Rafaela",[P("Filipe")])],"união")])],"Ramo 2"),P("Lucília Carvalho & Constantino",[P("Nelson & Mariazinha",[P("Solange & Tobi",[P("Rafael"),P("Lucky"),P("Aliej")]),P("Tommy"),P("Stephanie"),P("Nicolas")]),P("Leno"),P("Carlos Osvaldo & Manuela",[P("Susana Raquel")]),P("César",[P("Heliana")])],"Ramo 3"),P("Alice Carvalho & Armindo",[P("Fernando Hitler & Mª Teresa",[P("Vera",[P("Carlos Miguel"),P("Rodrigo"),P("Lucas")]),P("Fernando"),P("Aires")]),P("Elsa & Queirós",[P("Miguel"),P("Ivo & Ana Cristina",[P("Thelma"),P("Tomas")]),P("Nuno & Luísa",[P("Tiago")]),P("Hildeberto Jorge & Tânia")]),P("Sandra",[P("com Ângelo",[P("Ricardo César"),P("João Filipe"),P("Ângela & Tomás",[P("Guilherme")])],"união"),P("com Otelo",[P("Martim")],"união")])],"Ramo 4"),P("Mª Lourdes (Lurdes) Carvalho & Zé",[P("Célia & João Lemos",[P("Marina",[P("Maria Vitória")])]),P("Fernando"),P("Carla & Carlos",[P("Beatriz",[P("Daniel")]),P("Pedro")])],"Ramo 5"),P("Emília Carvalho & Mário",[P("Carlos Jorge & Patrícia")],"Ramo 6"),P("Fernando Edgar José de Carvalho & Maria Ana",[P("Ana Sofia Gonçalves de Carvalho & Rui",[P("Inês"),P("Gonçalo")]),P("Rui Edgar & Davi")],"Ramo 7"),P("Isabel Celeste Carvalho & Joaquim",[P("Vera Mónica & Adrian",[P("Lara"),P("Liam")]),P("Ana Cristina & Gonçalo",[P("Maria Rita")])],"Ramo 8")],"Genearcas"),asc:[P("Linhagem Patrilinear — Pais de Aires",[],"Vila Nova de Famalicão"),P("Linhagem Matrilinear — Pais de Rosa",[P("Pai de Rosa",[],"Transmontano"),P("Mãe de Rosa",[],"Angolana")],"avós maternos"),P("Tios-Avós Paternos",[P("Amélia de Carvalho"),P("Irmão varão")])]};
 
-var state={data:null,pending:[],history:[],expanded:new Set(),tab:"pending",authed:false};
+var state={data:null,pending:[],history:[],expanded:new Set(),tab:"pending",authed:false,dirty:false};
 var nById={},pId={};
 function esc(s){return String(s||"").replace(/[&<>"']/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]})}
 function fmtD(t){try{return new Date(t).toLocaleDateString("pt-BR",{day:"2-digit",month:"short",hour:"2-digit",minute:"2-digit"})}catch(e){return""}}
@@ -241,7 +244,7 @@ function renderAll(){
   document.getElementById("app").innerHTML=
     '<header class="header"><div class="header-icon">🌱</div><div><h1>Painel Admin</h1><small>Carvalho & Batista</small></div><a href="index.html">Ver site →</a></header>'
     +'<div class="layout">'
-    +'<div class="tree-pane"><div class="toolbar"><button class="btn secondary sm" onclick="expandAll()">Expandir tudo</button><button class="btn secondary sm" onclick="collapseAll()">Recolher tudo</button></div>'+treeHTML+'</div>'
+    +'<div class="tree-pane"><div class="action-bar"><button class="btn sm" onclick="goBack()">← Voltar ao site</button>'+(state.dirty?'<span class="unsaved">Alterações não salvas</span><button class="btn ok sm" onclick="saveAll()">💾 Salvar alterações</button>':'<span style="font-size:12px;color:var(--text3)">Tudo salvo</span>')+'</div><div class="toolbar"><button class="btn secondary sm" onclick="expandAll()">Expandir tudo</button><button class="btn secondary sm" onclick="collapseAll()">Recolher tudo</button></div>'+treeHTML+'</div>'
     +'<div class="panel-pane">'+panelHTML+'</div>'
     +'</div>';
 }
@@ -270,7 +273,7 @@ window.editName=function(id){
 }
 window.saveName=async function(id){
   var v=(document.getElementById("en").value||"").trim();if(!v){toast("Nome vazio");return}
-  nById[id].name=v;await save();toast("Atualizado",true);closeM();reindex();renderAll();
+  nById[id].name=v;state.dirty=true;toast("Nome alterado (salve para aplicar)");closeM();reindex();renderAll();
 }
 window.addChild=function(id){
   var n=nById[id];if(!n)return;
@@ -280,12 +283,12 @@ window.addChild=function(id){
 window.saveChild=async function(id){
   var v=(document.getElementById("cn").value||"").trim();if(!v){toast("Nome vazio");return}
   var n=nById[id];(n.children=n.children||[]).push({name:v,meta:null,notes:[],children:[]});
-  reindex();await save();toast("Adicionado",true);closeM();state.expanded.add(id);renderAll();
+  reindex();state.dirty=true;toast("Adicionado (salve para aplicar)");closeM();state.expanded.add(id);renderAll();
 }
 window.moveSib=async function(id,dir){
   var s=siblingsOf(id);if(!s)return;var arr=s.arr,idx=s.idx,j=idx+dir;
   if(j<0||j>=arr.length)return;var tmp=arr[idx];arr[idx]=arr[j];arr[j]=tmp;
-  reindex();await save();toast("Reordenado",true);renderAll();
+  reindex();state.dirty=true;toast("Reordenado (salve para aplicar)");renderAll();
 }
 window.delNode=function(id){
   var n=nById[id];if(!n)return;var kids=n.children||[];
@@ -300,7 +303,7 @@ window.doDel=async function(id,mode){
   var s=siblingsOf(id);if(!s){closeM();return}var n=s.arr[s.idx],kids=n.children||[];
   if(mode==="up"&&kids.length)s.arr.splice(s.idx,1,...kids);
   else s.arr.splice(s.idx,1);
-  reindex();await save();toast("Excluído",true);closeM();renderAll();
+  reindex();state.dirty=true;toast("Excluído (salve para aplicar)");closeM();renderAll();
 }
 window.moveToModal=function(id){
   var n=nById[id];if(!n)return;
@@ -311,9 +314,19 @@ window.moveToModal=function(id){
 window.doMoveTo=async function(id,npid){
   var s=siblingsOf(id);if(!s)return;var node=s.arr[s.idx];s.arr.splice(s.idx,1);
   var np=nById[npid];(np.children=np.children||[]).push(node);
-  reindex();await save();toast("Movido",true);closeM();state.expanded.add(npid);renderAll();
+  reindex();state.dirty=true;toast("Movido (salve para aplicar)");closeM();state.expanded.add(npid);renderAll();
 }
 
+/* === SALVAR E VOLTAR === */
+window.saveAll=async function(){
+  var ok=await save();
+  if(ok){state.dirty=false;toast("Salvo! As mudanças já estão no site.",true);renderAll()}
+  else toast("Erro ao salvar")
+}
+window.goBack=function(){
+  if(state.dirty){if(!confirm("Tem alterações não salvas. Sair mesmo assim?"))return}
+  window.location.href="index.html";
+}
 /* === DRAG & DROP === */
 var dragId=null;
 document.addEventListener("dragstart",function(e){var nd=e.target.closest(".node-row[draggable]");if(!nd)return;dragId=nd.getAttribute("data-id");nd.classList.add("dragging");e.dataTransfer.effectAllowed="move"});
@@ -336,7 +349,7 @@ document.addEventListener("drop",async function(e){
   var src=siblingsOf(dragId);if(!src)return;var node=src.arr[src.idx];
   if(mode==="into"){src.arr.splice(src.idx,1);var np=nById[tid];(np.children=np.children||[]).push(node);state.expanded.add(tid)}
   else{src.arr.splice(src.idx,1);reindex();var tgt=siblingsOf(tid);if(!tgt)return;var at=mode==="before"?tgt.idx:tgt.idx+1;tgt.arr.splice(at,0,node)}
-  reindex();await save();toast("Movido",true);renderAll();
+  reindex();state.dirty=true;toast("Movido (salve para aplicar)");renderAll();
 });
 
 /* === TOGGLE & EVENTS === */
@@ -349,6 +362,7 @@ document.getElementById("modal").addEventListener("click",function(e){if(e.targe
 document.addEventListener("keydown",function(e){if(e.key==="Escape")closeM()});
 
 renderLogin();
+window.addEventListener("beforeunload",function(e){if(state.dirty){e.preventDefault();e.returnValue=""}});
 </script>
 </body>
 </html>
